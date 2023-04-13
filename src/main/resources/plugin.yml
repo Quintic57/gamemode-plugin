@@ -1,0 +1,14 @@
+name: gamemode-plugin
+version: '${project.version}'
+main: my.dw.gamemodeplugin.GameModePlugin
+api-version: 1.20
+commands:
+  endgamemode:
+    description: Ends the current game mode
+    usage: "Usage: /<command>"
+  selectgamemode:
+    description: Opens the select game mode menu
+    usage: "Usage: /<command>"
+  test:
+    description: Only used for internal testing
+    usage: "Usage: /<command>"
