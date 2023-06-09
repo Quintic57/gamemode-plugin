@@ -1,10 +1,11 @@
 package my.dw.gamemodeplugin.command;
 
-import my.dw.gamemodeplugin.ui.SelectGameModeGui;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import static my.dw.gamemodeplugin.utils.GuiUtils.NAME_TO_BASE_GUIS;
 
 public class SelectGameModeCommand implements CommandExecutor {
 
@@ -12,7 +13,7 @@ public class SelectGameModeCommand implements CommandExecutor {
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            SelectGameModeGui.openInventory(player);
+            NAME_TO_BASE_GUIS.get("Select Game Mode").openInventory(player);
 
             return true;
         }
