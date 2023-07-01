@@ -1,4 +1,4 @@
-package my.dw.gamemodeplugin.ui.gamemodesetup;
+package my.dw.gamemodeplugin.ui.selectgamemode;
 
 import my.dw.gamemodeplugin.exception.NoPlayerToTargetException;
 import my.dw.gamemodeplugin.ui.GuiFunction;
@@ -8,33 +8,28 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public class GameModeSetupGui extends InventoryGui {
 
-    public static final String NAME = "Game Mode Setup";
-
-    private static final String SELECT_TEAM_GUI_NAME = "Select Team";
-
-    private static final String GAME_MODE_SETTINGS_GUI_NAME = "Game Mode Settings";
+    public static final String DEFAULT_NAME = "Game Mode Setup";
 
     //TODO: I think we have to define the gui hierarchy within the classes, else NAME_TO_INVENTORY_GUI.get("{guiName}")
     // always returns null since all the guis are being created at the same time
-    public GameModeSetupGui(final String parentGuiName) {
-        this(NAME, parentGuiName);
+    public GameModeSetupGui(final InventoryGui parentGui) {
+        this(DEFAULT_NAME, parentGui);
     }
 
-    public GameModeSetupGui(final String guiName, final String parentGuiName) {
+    public GameModeSetupGui(final String guiName, final InventoryGui parentGui) {
         super(
             guiName,
-            parentGuiName,
-            18,
-            Map.of(
-                GAME_MODE_SETTINGS_GUI_NAME, new ConfigureGameMode(guiName),
-                SELECT_TEAM_GUI_NAME, new SelectTeamGui(guiName)
-            )
+            parentGui,
+            18
         );
+        final InventoryGui configureGameModeGui = new ConfigureGameModeGui(this);
+        nameToChildGuis.put(configureGameModeGui.getInventory(), configureGameModeGui);
+        final InventoryGui selectTeamGui = new SelectTeamGui(this);
+        nameToChildGuis.put(selectTeamGui.getInventory(), selectTeamGui);
 
         for (InventoryGui childGui: this.nameToChildGuis.values()) {
             final ItemStack guiKey = createDisplayItem(Material.PAPER, childGui.getGuiName(), List.of());

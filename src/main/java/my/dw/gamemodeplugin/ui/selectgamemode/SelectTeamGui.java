@@ -1,4 +1,4 @@
-package my.dw.gamemodeplugin.ui.gamemodesetup;
+package my.dw.gamemodeplugin.ui.selectgamemode;
 
 import my.dw.gamemodeplugin.exception.NoPlayerToTargetException;
 import my.dw.gamemodeplugin.ui.GuiFunction;
@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,12 +23,13 @@ public class SelectTeamGui extends InventoryGui {
 
     private final Map<UUID, Set<UUID>> teamCaptainToTeamList;
 
-    public SelectTeamGui(final String parentGuiName) {
-        this("Select Team", parentGuiName);
+    public SelectTeamGui(final InventoryGui parentGui) {
+        this("Select Team", parentGui);
     }
 
-    public SelectTeamGui(final String guiName, final String parentGuiName) {
-        super(guiName, parentGuiName, 9);
+    public SelectTeamGui(final String guiName, final InventoryGui parentGui) {
+        //TODO: Should be larger than Bukkit.getOnlinePlayers().size() and a multiple of 9
+        super(guiName, parentGui, 18);
 
         teamCaptainToTeamList = new LinkedHashMap<>();
         for (Player p: Bukkit.getOnlinePlayers()) {

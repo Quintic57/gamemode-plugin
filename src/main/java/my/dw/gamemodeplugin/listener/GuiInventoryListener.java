@@ -10,14 +10,14 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 import java.util.Objects;
 
-import static my.dw.gamemodeplugin.utils.GuiUtils.NAME_TO_BASE_GUIS;
+import static my.dw.gamemodeplugin.utils.GuiUtils.NAME_TO_BASE_GUI;
 
 public class GuiInventoryListener implements Listener {
 
     @EventHandler
     public void onInventoryClickEvent(final InventoryClickEvent event) {
         if (isInventoryGuiEvent(event)) {
-            final InventoryGui gui = NAME_TO_BASE_GUIS.get(event.getView().getTitle());
+            final InventoryGui gui = NAME_TO_BASE_GUI.get(event.getView().getTitle());
             final Player player = (Player) event.getWhoClicked();
 
             try {
@@ -33,8 +33,8 @@ public class GuiInventoryListener implements Listener {
         return event.getWhoClicked() instanceof Player
             && !event.getView().getTitle().isEmpty()
             && Streams.concat(
-                NAME_TO_BASE_GUIS.keySet().stream(),
-                NAME_TO_BASE_GUIS.values().stream().flatMap(gui -> gui.getNameToChildGuis().keySet().stream())
+                NAME_TO_BASE_GUI.keySet().stream(),
+                NAME_TO_BASE_GUI.values().stream().flatMap(gui -> gui.getNameToChildGuis().keySet().stream())
             ).anyMatch(gui -> gui.equals(event.getView().getTitle()))
             && Objects.nonNull(event.getCurrentItem());
     }

@@ -1,7 +1,7 @@
 package my.dw.gamemodeplugin.ui;
 
 import my.dw.gamemodeplugin.model.GameMode;
-import my.dw.gamemodeplugin.ui.gamemodesetup.GameModeSetupGui;
+import my.dw.gamemodeplugin.ui.selectgamemode.GameModeSetupGui;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -9,30 +9,29 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 public class SelectGameModeGui extends InventoryGui {
 
-    public static final String NAME;
+    public static final String DEFAULT_NAME;
 
     static {
-        NAME = "Select Game Mode";
+        DEFAULT_NAME = "Select Game Mode";
     }
 
     public SelectGameModeGui() {
         super(
-            NAME,
-            "",
+            DEFAULT_NAME,
+            null,
             (int) Math.ceil((GameMode.values().length + 1) / 9.0) * 9
         );
-        final InventoryGui gameModeSetup = new GameModeSetupGui(NAME);
-        nameToChildGuis.put(gameModeSetup.guiName, gameModeSetup);
+        final InventoryGui gameModeSetup = new GameModeSetupGui(this);
+        nameToChildGuis.put(gameModeSetup.getInventory(), gameModeSetup);
 
         for (GameMode gm: GameMode.values()) {
             final GuiFunction guiFunction = event -> {
                 final Player player = (Player) event.getWhoClicked();
                 gm.getHandler().before();
-                this.nameToChildGuis.get(GameModeSetupGui.NAME).openInventory(player);
+                this.nameToChildGuis.get(event.getClickedInventory()).openInventory(player);
             };
             displayItemMap.put(getDisplayItem(gm), guiFunction);
         }

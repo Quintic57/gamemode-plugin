@@ -21,26 +21,27 @@ public abstract class InventoryGui {
     // TODO: If this is going to be a unique identifier, remove this attribute.
     protected final String guiName;
 
+    //TODO: Is it possible to use this unique object as an identifier for inventories, and index it with event.getClickedInventory()?
     protected final Inventory inventory;
 
     protected final Map<ItemStack, GuiFunction> displayItemMap;
 
-    protected final String parentGuiName;
+    protected final InventoryGui parentGui;
 
-    protected final Map<String, InventoryGui> nameToChildGuis;
+    protected final Map<Inventory, InventoryGui> nameToChildGuis;
 
-    public InventoryGui(final String guiName, final String parentGuiName, final int inventorySize) {
-        this(guiName, parentGuiName, inventorySize, new HashMap<>());
+    public InventoryGui(final String guiName, final InventoryGui parentGui, final int inventorySize) {
+        this(guiName, parentGui, inventorySize, new HashMap<>());
     }
 
     public InventoryGui(final String guiName,
-                        final String parentGuiName,
+                        final InventoryGui parentGui,
                         final int inventorySize,
-                        final Map<String, InventoryGui> nameToChildGuis) {
+                        final Map<Inventory, InventoryGui> nameToChildGuis) {
         this.guiName = guiName;
         this.inventory = Bukkit.createInventory(null, inventorySize, this.guiName);
         this.displayItemMap = new HashMap<>();
-        this.parentGuiName = parentGuiName;
+        this.parentGui = parentGui;
         this.nameToChildGuis = nameToChildGuis;
     }
 
@@ -66,7 +67,11 @@ public abstract class InventoryGui {
         return guiName;
     }
 
-    public Map<String, InventoryGui> getNameToChildGuis() {
+    public Inventory getInventory() {
+        return inventory;
+    }
+
+    public Map<Inventory, InventoryGui> getNameToChildGuis() {
         return nameToChildGuis;
     }
 
