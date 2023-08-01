@@ -15,15 +15,17 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+// TODO: Might have to split this into base/unique/common InventoryGuis, where base/unique guis have unique names and thus can be
+//  accessed from anywhere in the code, whereas common guis can have different names and have to be indexed by inventory object
 public abstract class InventoryGui {
 
     protected final String guiName;
 
-    //TODO: Is it possible to use this unique object as an identifier for inventories, and index it with event.getClickedInventory()?
     protected final Inventory inventory;
 
-    protected final Map<ItemStack, GuiFunction> displayItemMap;
+    protected final Map<ItemKey, GuiFunction> itemToGuiFunction;
 
     protected final InventoryGui parentGui;
 
@@ -39,20 +41,23 @@ public abstract class InventoryGui {
                         final Map<Inventory, InventoryGui> childGuis) {
         this.guiName = guiName;
         this.inventory = Bukkit.createInventory(null, inventorySize, guiName);
-        this.displayItemMap = new HashMap<>();
+        this.itemToGuiFunction = new HashMap<>();
         this.parentGui = parentGui;
         this.childGuis = childGuis;
 
         final ItemStack backButtonItem = createDisplayItem(Material.BARRIER, "Go Back");
         final GuiFunction backButtonFunction = event -> {
             final Player player = (Player) event.getWhoClicked();
-            if (this.parentGui == null) {
+            if (parentGui == null) {
                 player.sendMessage("There is no page to go back to");
                 return;
             }
-            this.parentGui.openInventory(player);
+            if (parentGui instanceof DynamicInventory) {
+                ((DynamicInventory) parentGui).refreshInventory();
+            }
+            parentGui.openInventory(player);
         };
-        this.displayItemMap.put(backButtonItem, backButtonFunction);
+        this.itemToGuiFunction.put(ItemKey.generate(backButtonItem), backButtonFunction);
         this.inventory.setItem(inventorySize - 1, backButtonItem);
     }
 
@@ -87,15 +92,28 @@ public abstract class InventoryGui {
         return childGuis;
     }
 
+    protected void clearInventory() {
+        final ItemStack backButton = inventory.getItem(inventory.getSize() - 1);
+        if (backButton == null) {
+            throw new IllegalStateException("Back button can never be null");
+        }
+
+        inventory.clear();
+        inventory.setItem(inventory.getSize() - 1, backButton);
+        itemToGuiFunction.keySet().retainAll(Set.of(ItemKey.generate(backButton)));
+    }
+
     public void openInventory(final HumanEntity entity) {
+        if (this instanceof DynamicInventory) {
+            ((DynamicInventory) this).refreshInventory();
+        }
         entity.openInventory(inventory);
     }
 
     public void handleOnInventoryClickEvent(final InventoryClickEvent event) throws NoPlayerToTargetException {
-        final GuiFunction guiFunction = displayItemMap.get(event.getCurrentItem());
+        final GuiFunction guiFunction = itemToGuiFunction.get(ItemKey.generate(event.getCurrentItem()));
         if (guiFunction == null) {
-            //TODO: should we send a message to player to notify that the button has no functionality?
-//            event.getWhoClicked().sendMessage("There is no functionality implemented for this button");
+            event.getWhoClicked().sendMessage("There is no functionality implemented for this button");
             return;
         }
         guiFunction.execute(event);

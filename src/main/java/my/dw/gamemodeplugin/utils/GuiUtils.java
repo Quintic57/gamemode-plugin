@@ -13,8 +13,7 @@ public class GuiUtils {
     public static final Map<String, InventoryGui> NAME_TO_BASE_GUI;
     public static final Map<Inventory, InventoryGui> INVENTORY_TO_GUI;
 
-    // TODO: This is crusty, there should probably be a configuration object that holds configurable values like this,
-    //  and one should be created each time GM configuration is initiated.
+    // TODO: This is crusty, should probably be stored as metadata
     public static GameMode currentGameMode;
 
     static {

@@ -1,12 +1,13 @@
 package my.dw.gamemodeplugin.ui;
 
 import my.dw.gamemodeplugin.model.GameMode;
-import my.dw.gamemodeplugin.ui.selectgamemode.GameModeSetupGui;
-import org.bukkit.ChatColor;
+import my.dw.gamemodeplugin.ui.selectgamemode.SetUpGameModeGui;
+import my.dw.gamemodeplugin.utils.GuiUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -16,21 +17,25 @@ public class SelectGameModeGui extends InventoryGui {
 
     public SelectGameModeGui() {
         super(DEFAULT_NAME, (int) Math.ceil((GameMode.values().length + 1) / 9.0) * 9, null);
-        final InventoryGui gameModeSetup = new GameModeSetupGui(this);
-        childGuis.put(gameModeSetup.getInventory(), gameModeSetup);
+        final InventoryGui setUpGameMode = new SetUpGameModeGui(this);
+        childGuis.put(setUpGameMode.getInventory(), setUpGameMode);
 
-        for (GameMode gm: GameMode.values()) {
+        // game modes displayed in alphabetical order
+        Arrays.stream(GameMode.values()).sorted((Comparator.comparing(Enum::name))).forEach(gm -> {
+            final ItemStack guiItem = getDisplayItem(gm);
             final GuiFunction guiFunction = event -> {
                 final Player player = (Player) event.getWhoClicked();
-                gm.getHandler().before();
-                childGuis.get(gameModeSetup.getInventory()).openInventory(player);
+                if (GuiUtils.currentGameMode != null && GuiUtils.currentGameMode != gm) {
+                    player.sendMessage("Gamemode " + GuiUtils.currentGameMode.name() + " is currently being configured." +
+                        "To continue that setup, type /setupgamemode. To end that setup, type /endgamemode.");
+                    return;
+                }
+                gm.getHandler().before(player);
+                childGuis.get(setUpGameMode.getInventory()).openInventory(player);
             };
-            displayItemMap.put(getDisplayItem(gm), guiFunction);
-        }
-        // game modes displayed in alphabetical order
-        displayItemMap.keySet().stream()
-            .sorted((Comparator.comparing(item -> ChatColor.stripColor(item.getItemMeta().getDisplayName()))))
-            .forEach(this.inventory::addItem);
+            itemToGuiFunction.put(ItemKey.generate(guiItem), guiFunction);
+            inventory.addItem(guiItem);
+        });
     }
 
     private ItemStack getDisplayItem(final GameMode gameMode) {

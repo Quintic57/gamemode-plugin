@@ -9,6 +9,9 @@ commands:
   selectgamemode:
     description: Opens the select game mode menu
     usage: "Usage: /<command>"
+  setupgamemode:
+    description: Opens the game mode setup
+    usage: "Usage: /<command>"
   test:
     description: Only used for internal testing
     usage: "Usage: /<command>"
