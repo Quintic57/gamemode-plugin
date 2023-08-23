@@ -11,10 +11,6 @@ import java.time.temporal.ChronoUnit;
 
 public class CaptureTheFlagHandler extends GameModeHandler {
 
-    public CaptureTheFlagHandler(final GameModeConfiguration defaultConfiguration) {
-        super(defaultConfiguration);
-    }
-
     @Override
     public void before(final Player gmm) {
 

@@ -2,21 +2,43 @@ package my.dw.gamemodeplugin.utils;
 
 import my.dw.gamemodeplugin.model.GameMode;
 import my.dw.gamemodeplugin.ui.InventoryGui;
-import my.dw.gamemodeplugin.ui.SelectGameModeGui;
+import my.dw.gamemodeplugin.ui.selectgamemode.SelectGameModeGui;
+import org.bukkit.ChatColor;
 import org.bukkit.inventory.Inventory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GuiUtils {
 
+    public static final List<ChatColor> TEAM_COLOR_OPTIONS;
+    public static final int MAX_NUMBER_OF_TEAMS;
     public static final Map<String, InventoryGui> NAME_TO_BASE_GUI;
     public static final Map<Inventory, InventoryGui> INVENTORY_TO_GUI;
 
-    // TODO: This is crusty, should probably be stored as metadata
+    // TODO: This is crusty, should probably be stored as metadata in the metadata container
     public static GameMode currentGameMode;
 
     static {
+        TEAM_COLOR_OPTIONS = List.of(
+            ChatColor.AQUA,
+            ChatColor.BLUE,
+            ChatColor.DARK_AQUA,
+            ChatColor.DARK_BLUE,
+            ChatColor.DARK_GRAY,
+            ChatColor.DARK_GREEN,
+            ChatColor.DARK_PURPLE,
+            ChatColor.DARK_RED,
+            ChatColor.GOLD,
+            ChatColor.GRAY,
+            ChatColor.GREEN,
+            ChatColor.LIGHT_PURPLE,
+            ChatColor.RED,
+            ChatColor.WHITE,
+            ChatColor.YELLOW
+        );
+        MAX_NUMBER_OF_TEAMS = TEAM_COLOR_OPTIONS.size();
         NAME_TO_BASE_GUI = new HashMap<>();
         INVENTORY_TO_GUI = new HashMap<>();
         registerBaseGuis(new SelectGameModeGui());

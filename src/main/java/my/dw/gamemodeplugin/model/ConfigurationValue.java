@@ -4,14 +4,14 @@ import java.util.List;
 
 public class ConfigurationValue<T> {
 
-    private T data;
+    private T value;
 
     private List<T> valueRange;
 
     private T defaultValue;
 
-    public T getData() {
-        return data;
+    public T getValue() {
+        return value;
     }
 
     public List<T> getValueRange() {
@@ -22,8 +22,8 @@ public class ConfigurationValue<T> {
         return defaultValue;
     }
 
-    public void setData(final T data) {
-        this.data = data;
+    public void setValue(final T value) {
+        this.value = value;
     }
 
     public void setValueRange(final List<T> valueRange) {

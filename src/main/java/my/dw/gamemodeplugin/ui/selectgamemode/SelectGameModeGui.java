@@ -1,7 +1,10 @@
-package my.dw.gamemodeplugin.ui;
+package my.dw.gamemodeplugin.ui.selectgamemode;
 
 import my.dw.gamemodeplugin.model.GameMode;
-import my.dw.gamemodeplugin.ui.selectgamemode.SetUpGameModeGui;
+import my.dw.gamemodeplugin.ui.GuiFunction;
+import my.dw.gamemodeplugin.ui.InventoryGui;
+import my.dw.gamemodeplugin.ui.ItemKey;
+import my.dw.gamemodeplugin.ui.selectgamemode.setupgamemode.SetUpGameModeGui;
 import my.dw.gamemodeplugin.utils.GuiUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -17,6 +20,7 @@ public class SelectGameModeGui extends InventoryGui {
 
     public SelectGameModeGui() {
         super(DEFAULT_NAME, (int) Math.ceil((GameMode.values().length + 1) / 9.0) * 9, null);
+
         final InventoryGui setUpGameMode = new SetUpGameModeGui(this);
         childGuis.put(setUpGameMode.getInventory(), setUpGameMode);
 

@@ -1,124 +1,125 @@
 package my.dw.gamemodeplugin.model;
 
 
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import lombok.Getter;
+import my.dw.gamemodeplugin.utils.GuiUtils;
+import org.bukkit.ChatColor;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+
+@Getter
 public class GameModeConfiguration {
 
-    private final ConfigurationValue<Integer> numberOfTeams;
+    private final ConfigurationValue<Integer> numberOfTeamsConfig;
 
-    private final ConfigurationValue<Boolean> randomizedTeams;
+    private final ConfigurationValue<Boolean> randomizedTeamsConfig;
 
-    private final ConfigurationValue<Integer> scoreLimit;
+    private final ConfigurationValue<Integer> scoreLimitConfig;
 
-    private final ConfigurationValue<Duration> timeLimit;
+    private final ConfigurationValue<Integer> timeLimitInMinutesConfig;
 
-    private final ConfigurationValue<Boolean> foodEnabled;
+    private final ConfigurationValue<Boolean> foodEnabledConfig;
 
-    private final Map<UUID, Set<UUID>> teamCaptainToPlayerList;
+    private final List<GameModeTeam> teams;
 
     // TODO: Should probably snapshot (OPPA) the online player list when initiating select game mode, that way there's
     //  something to reset to if players all agree to reset the team selection
     public GameModeConfiguration() {
-        numberOfTeams = new ConfigurationValue<>();
-        randomizedTeams = new ConfigurationValue<>();
-        scoreLimit = new ConfigurationValue<>();
-        timeLimit = new ConfigurationValue<>();
-        foodEnabled = new ConfigurationValue<>();
-        teamCaptainToPlayerList = new HashMap<>();
+        numberOfTeamsConfig = new ConfigurationValue<>();
+        randomizedTeamsConfig = new ConfigurationValue<>();
+        scoreLimitConfig = new ConfigurationValue<>();
+        timeLimitInMinutesConfig = new ConfigurationValue<>();
+        foodEnabledConfig = new ConfigurationValue<>();
+        teams = new ArrayList<>();
     }
 
-    public GameModeConfiguration initNumberOfTeams(final int defaultValue, final List<Integer> valueRange) {
-        this.numberOfTeams.setData(defaultValue);
-        this.numberOfTeams.setDefaultValue(defaultValue);
-        this.numberOfTeams.setValueRange(valueRange);
+    public GameModeConfiguration initNumberOfTeamsConfig(final int defaultValue, final List<Integer> valueRange) {
+        this.numberOfTeamsConfig.setValue(defaultValue);
+        this.numberOfTeamsConfig.setDefaultValue(defaultValue);
+        this.numberOfTeamsConfig.setValueRange(valueRange);
         return this;
     }
     
-    public GameModeConfiguration initRandomizedTeams(final boolean defaultValue) {
-        this.randomizedTeams.setData(defaultValue);
-        this.randomizedTeams.setDefaultValue(defaultValue);
-        this.randomizedTeams.setValueRange(List.of(false, true));
+    public GameModeConfiguration initRandomizedTeamsConfig(final boolean defaultValue) {
+        this.randomizedTeamsConfig.setValue(defaultValue);
+        this.randomizedTeamsConfig.setDefaultValue(defaultValue);
+        this.randomizedTeamsConfig.setValueRange(List.of(false, true));
         return this;
     }
     
-    public GameModeConfiguration initScoreLimit(final int defaultValue, final List<Integer> valueRange) {
-        this.scoreLimit.setData(defaultValue);
-        this.scoreLimit.setDefaultValue(defaultValue);
-        this.scoreLimit.setValueRange(valueRange);
+    public GameModeConfiguration initScoreLimitConfig(final int defaultValue, final List<Integer> valueRange) {
+        this.scoreLimitConfig.setValue(defaultValue);
+        this.scoreLimitConfig.setDefaultValue(defaultValue);
+        this.scoreLimitConfig.setValueRange(valueRange);
         return this;
     }
 
-    public GameModeConfiguration initTimeLimit(final Duration defaultValue, final List<Duration> valueRange) {
-        this.timeLimit.setData(defaultValue);
-        this.timeLimit.setDefaultValue(defaultValue);
-        this.timeLimit.setValueRange(valueRange);
+    public GameModeConfiguration initTimeLimitInMinutesConfig(final Integer defaultValue,
+                                                              final List<Integer> valueRange) {
+        this.timeLimitInMinutesConfig.setValue(defaultValue);
+        this.timeLimitInMinutesConfig.setDefaultValue(defaultValue);
+        this.timeLimitInMinutesConfig.setValueRange(valueRange);
         return this;
     }
 
-    public GameModeConfiguration initFoodEnabled(final boolean defaultValue) {
-        this.foodEnabled.setData(defaultValue);
-        this.foodEnabled.setDefaultValue(defaultValue);
-        this.foodEnabled.setValueRange(List.of(false, true));
+    public GameModeConfiguration initFoodEnabledConfig(final boolean defaultValue) {
+        this.foodEnabledConfig.setValue(defaultValue);
+        this.foodEnabledConfig.setDefaultValue(defaultValue);
+        this.foodEnabledConfig.setValueRange(List.of(false, true));
         return this;
     }
 
-    public ConfigurationValue<Integer> getNumberOfTeams() {
-        return numberOfTeams;
+    public GameModeConfiguration initTeamsList() {
+        registerNewTeams(numberOfTeamsConfig.getValue());
+        return this;
     }
 
-    public void setNumberOfTeams(final int numberOfTeams) {
-        this.numberOfTeams.setData(numberOfTeams);
+    public void registerNewTeams(final int numberOfTeams) {
+        teams.clear();
+        final Random random = new Random();
+        final List<ChatColor> randomColors = random
+            .ints(numberOfTeams, 0, GuiUtils.MAX_NUMBER_OF_TEAMS)
+            .mapToObj(GuiUtils.TEAM_COLOR_OPTIONS::get)
+            .collect(Collectors.toList());
+        for (int i = 0; i < numberOfTeams; i++) {
+            teams.add(new GameModeTeam("Team " + (i + 1), randomColors.get(i)));
+        }
     }
 
-    public ConfigurationValue<Boolean> getRandomizedTeams() {
-        return randomizedTeams;
+    public void resetTeams() {
+        teams.forEach(GameModeTeam::reset);
     }
 
-    public void setRandomizedTeams(final boolean randomizedTeams) {
-        this.randomizedTeams.setData(randomizedTeams);
+    public void setNumberOfTeamsValue(final int numberOfTeamsConfig) {
+        this.numberOfTeamsConfig.setValue(numberOfTeamsConfig);
     }
 
-    public ConfigurationValue<Integer> getScoreLimit() {
-        return scoreLimit;
+    public void setRandomizedTeamsValue(final boolean randomizedTeamsConfig) {
+        this.randomizedTeamsConfig.setValue(randomizedTeamsConfig);
     }
 
-    public void setScoreLimit(final int scoreLimit) {
-        this.scoreLimit.setData(scoreLimit);
+    public void setScoreLimitValue(final int scoreLimitConfig) {
+        this.scoreLimitConfig.setValue(scoreLimitConfig);
     }
 
-    public ConfigurationValue<Duration> getTimeLimit() {
-        return timeLimit;
+    public void setTimeLimitInMinutesValue(final Integer timeLimitInMinutesConfig) {
+        this.timeLimitInMinutesConfig.setValue(timeLimitInMinutesConfig);
     }
 
-    public void setTimeLimit(final Duration timeLimit) {
-        this.timeLimit.setData(timeLimit);
-    }
-
-    public ConfigurationValue<Boolean> getFoodEnabled() {
-        return foodEnabled;
-    }
-
-    public void setFoodEnabled(final boolean foodEnabled) {
-        this.foodEnabled.setData(foodEnabled);
-    }
-
-    public Map<UUID, Set<UUID>> getTeamCaptainToPlayerList() {
-        return teamCaptainToPlayerList;
+    public void setFoodEnabledValue(final boolean foodEnabledConfig) {
+        this.foodEnabledConfig.setValue(foodEnabledConfig);
     }
 
     public void reset() {
-        numberOfTeams.setData(numberOfTeams.getDefaultValue());
-        randomizedTeams.setData(randomizedTeams.getDefaultValue());
-        scoreLimit.setData(scoreLimit.getDefaultValue());
-        timeLimit.setData(timeLimit.getDefaultValue());
-        foodEnabled.setData(foodEnabled.getDefaultValue());
-        teamCaptainToPlayerList.clear();
+        numberOfTeamsConfig.setValue(numberOfTeamsConfig.getDefaultValue());
+        randomizedTeamsConfig.setValue(randomizedTeamsConfig.getDefaultValue());
+        scoreLimitConfig.setValue(scoreLimitConfig.getDefaultValue());
+        timeLimitInMinutesConfig.setValue(timeLimitInMinutesConfig.getDefaultValue());
+        foodEnabledConfig.setValue(foodEnabledConfig.getDefaultValue());
+        registerNewTeams(numberOfTeamsConfig.getDefaultValue());
     }
     
 }

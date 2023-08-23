@@ -15,13 +15,9 @@ public class GuiInventoryListener implements Listener {
     public void onInventoryClickEvent(final InventoryClickEvent event) {
         if (isInventoryGuiEvent(event)) {
             final InventoryGui gui = INVENTORY_TO_GUI.get(event.getClickedInventory());
-            final Player player = (Player) event.getWhoClicked();
 
-            try {
+            if (gui.handleOnInventoryClickEvent(event)) {
                 event.setCancelled(true);
-                gui.handleOnInventoryClickEvent(event);
-            } catch (NoPlayerToTargetException e) {
-                player.sendMessage(e.getMessage());
             }
         }
     }

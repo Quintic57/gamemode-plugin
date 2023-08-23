@@ -1,6 +1,6 @@
 package my.dw.gamemodeplugin.command;
 
-import my.dw.gamemodeplugin.ui.SelectGameModeGui;
+import my.dw.gamemodeplugin.ui.selectgamemode.SelectGameModeGui;
 import my.dw.gamemodeplugin.utils.GuiUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

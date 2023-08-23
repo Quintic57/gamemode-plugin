@@ -1,11 +1,9 @@
 package my.dw.gamemodeplugin.command;
 
-import static my.dw.gamemodeplugin.utils.GuiUtils.INVENTORY_TO_GUI;
 import static my.dw.gamemodeplugin.utils.GuiUtils.NAME_TO_BASE_GUI;
 
 import my.dw.gamemodeplugin.ui.InventoryGui;
-import my.dw.gamemodeplugin.ui.SelectGameModeGui;
-import my.dw.gamemodeplugin.ui.selectgamemode.SetUpGameModeGui;
+import my.dw.gamemodeplugin.ui.selectgamemode.SelectGameModeGui;
 import my.dw.gamemodeplugin.utils.GuiUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

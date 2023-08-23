@@ -1,6 +1,5 @@
 package my.dw.gamemodeplugin.ui;
 
-import my.dw.gamemodeplugin.exception.NoPlayerToTargetException;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -13,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,19 +31,14 @@ public abstract class InventoryGui {
 
     protected final Map<Inventory, InventoryGui> childGuis;
 
-    public InventoryGui(final String guiName, final int inventorySize, final InventoryGui parentGui) {
-        this(guiName, inventorySize, parentGui, new HashMap<>());
-    }
-
     public InventoryGui(final String guiName,
                         final int inventorySize,
-                        final InventoryGui parentGui,
-                        final Map<Inventory, InventoryGui> childGuis) {
+                        final InventoryGui parentGui) {
         this.guiName = guiName;
         this.inventory = Bukkit.createInventory(null, inventorySize, guiName);
         this.itemToGuiFunction = new HashMap<>();
         this.parentGui = parentGui;
-        this.childGuis = childGuis;
+        this.childGuis = new LinkedHashMap<>();
 
         final ItemStack backButtonItem = createDisplayItem(Material.BARRIER, "Go Back");
         final GuiFunction backButtonFunction = event -> {
@@ -110,13 +105,15 @@ public abstract class InventoryGui {
         entity.openInventory(inventory);
     }
 
-    public void handleOnInventoryClickEvent(final InventoryClickEvent event) throws NoPlayerToTargetException {
+    public boolean handleOnInventoryClickEvent(final InventoryClickEvent event) {
         final GuiFunction guiFunction = itemToGuiFunction.get(ItemKey.generate(event.getCurrentItem()));
         if (guiFunction == null) {
             event.getWhoClicked().sendMessage("There is no functionality implemented for this button");
-            return;
+            return false;
         }
+
         guiFunction.execute(event);
+        return true;
     }
 
 }

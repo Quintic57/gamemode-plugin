@@ -7,10 +7,6 @@ import org.bukkit.scoreboard.Score;
 
 public class DominationHandler extends GameModeHandler {
 
-    public DominationHandler(final GameModeConfiguration defaultConfiguration) {
-        super(defaultConfiguration);
-    }
-
     @Override
     public void before(final Player gmm) {
 
