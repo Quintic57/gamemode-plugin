@@ -2,7 +2,6 @@ package my.dw.gamemodeplugin.listener;
 
 import static my.dw.gamemodeplugin.utils.GuiUtils.INVENTORY_TO_GUI;
 
-import my.dw.gamemodeplugin.exception.NoPlayerToTargetException;
 import my.dw.gamemodeplugin.ui.InventoryGui;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,12 +12,13 @@ public class GuiInventoryListener implements Listener {
 
     @EventHandler
     public void onInventoryClickEvent(final InventoryClickEvent event) {
-        if (isInventoryGuiEvent(event)) {
-            final InventoryGui gui = INVENTORY_TO_GUI.get(event.getClickedInventory());
+        if (!isInventoryGuiEvent(event)) {
+            return;
+        }
 
-            if (gui.handleOnInventoryClickEvent(event)) {
-                event.setCancelled(true);
-            }
+        final InventoryGui gui = INVENTORY_TO_GUI.get(event.getClickedInventory());
+        if (gui.handleOnInventoryClickEvent(event)) {
+            event.setCancelled(true);
         }
     }
 

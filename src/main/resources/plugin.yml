@@ -4,13 +4,10 @@ main: my.dw.gamemodeplugin.GameModePlugin
 api-version: 1.20
 commands:
   endgamemode:
-    description: Ends the current game mode
+    description: Ends the specific game mode
     usage: "Usage: /<command>"
   selectgamemode:
     description: Opens the select game mode menu
-    usage: "Usage: /<command>"
-  setupgamemode:
-    description: Opens the game mode setup
     usage: "Usage: /<command>"
   test:
     description: Only used for internal testing

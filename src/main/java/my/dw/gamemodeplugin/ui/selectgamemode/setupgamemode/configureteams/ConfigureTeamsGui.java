@@ -1,15 +1,17 @@
 package my.dw.gamemodeplugin.ui.selectgamemode.setupgamemode.configureteams;
 
 import com.google.common.collect.Sets;
+import my.dw.gamemodeplugin.model.GameMode;
 import my.dw.gamemodeplugin.model.GameModeTeam;
+import my.dw.gamemodeplugin.ui.ChildGui;
 import my.dw.gamemodeplugin.ui.ConfiguredInventory;
 import my.dw.gamemodeplugin.ui.DynamicInventory;
 import my.dw.gamemodeplugin.ui.GuiFunction;
+import my.dw.gamemodeplugin.ui.GuiType;
 import my.dw.gamemodeplugin.ui.InventoryGui;
 import my.dw.gamemodeplugin.ui.ItemKey;
 import my.dw.gamemodeplugin.ui.selectgamemode.setupgamemode.configureteams.selectcaptains.SelectCaptainsGui;
 import my.dw.gamemodeplugin.ui.selectgamemode.setupgamemode.configureteams.selectplayers.SelectPlayersGui;
-import my.dw.gamemodeplugin.utils.GuiUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -18,30 +20,27 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class ConfigureTeamsGui extends InventoryGui implements ConfiguredInventory, DynamicInventory {
+public class ConfigureTeamsGui extends ChildGui implements ConfiguredInventory, DynamicInventory {
+    
+    private final GameMode gameMode;
 
-    public static final String DEFAULT_NAME = "Configure Teams";
+    public ConfigureTeamsGui(final InventoryGui parentGui, final GameMode gameMode) {
+        super("Configure Teams", GuiType.COMMON, 9, parentGui);
 
-    public ConfigureTeamsGui(final InventoryGui parentGui) {
-        this(DEFAULT_NAME, parentGui);
-    }
-
-    public ConfigureTeamsGui(final String guiName, final InventoryGui parentGui) {
-        super(guiName, 9, parentGui);
-
-        final InventoryGui selectCaptainsGui = new SelectCaptainsGui(this);
-        childGuis.put(selectCaptainsGui.getInventory(), selectCaptainsGui);
-        final InventoryGui selectTeamsGui = new SelectPlayersGui(this);
-        childGuis.put(selectTeamsGui.getInventory(), selectTeamsGui);
+        this.gameMode = gameMode;
+        final ChildGui selectCaptainsGui = new SelectCaptainsGui(this, gameMode);
+        childGuis.add(selectCaptainsGui);
+        final ChildGui selectTeamsGui = new SelectPlayersGui(this, gameMode);
+        childGuis.add(selectTeamsGui);
     }
 
     @Override
     public void refreshInventory() {
         clearInventory();
 
-        for (InventoryGui childGui: childGuis.values()) {
-            final ItemStack guiItem = createDisplayItem(Material.PAPER, childGui.getGuiName());
-            final GuiFunction guiFunction = randomizedTeamsIsActive()
+        for (ChildGui childGui: childGuis) {
+            final ItemStack guiItem = createDisplayItem(Material.PAPER, childGui.getName());
+            final GuiFunction guiFunction = gameMode.getCurrentConfiguration().getRandomizedTeamsConfig().getValue()
                 ? event -> event.getWhoClicked().sendMessage("Button disabled, Randomized Teams configuration is set to true")
                 : event -> childGui.openInventory(event.getWhoClicked());
             itemToGuiFunction.put(ItemKey.generate(guiItem), guiFunction);
@@ -49,41 +48,32 @@ public class ConfigureTeamsGui extends InventoryGui implements ConfiguredInvento
         }
         final ItemStack resetConfigurationItem = createDisplayItem(Material.PAPER, "Reset Configuration");
         final GuiFunction resetConfigurationFunction = event
-            -> GuiUtils.currentGameMode.getCurrentConfiguration().resetTeams();
+            -> gameMode.getCurrentConfiguration().resetTeams();
         this.itemToGuiFunction.put(ItemKey.generate(resetConfigurationItem), resetConfigurationFunction);
         this.inventory.setItem(7, resetConfigurationItem);
     }
 
     @Override
     public boolean isConfigured() {
-        if (GuiUtils.currentGameMode == null) {
-            return false;
-        }
-        if (GuiUtils.currentGameMode.getCurrentConfiguration().getNumberOfTeamsConfig().getValue() == 0) {
+        if (gameMode.getCurrentConfiguration().getNumberOfTeamsConfig().getValue() == 0) {
             return true;
         }
 
         // TODO: Can this be cleaner?
-        final Set<UUID> currentCaptains = GuiUtils.currentGameMode.getCurrentConfiguration().getTeams()
-            .stream()
-            .map(GameModeTeam::getCaptain)
-            .collect(Collectors.toSet());
-        final Set<UUID> currentPlayers = GuiUtils.currentGameMode.getCurrentConfiguration().getTeams()
-            .stream()
-            .flatMap(team -> team.getPlayerList().stream())
-            .collect(Collectors.toSet());
-        final Set<UUID> allPlayers = Sets.union(currentCaptains, currentPlayers);
+//        final Set<UUID> currentCaptains = gameMode.getCurrentConfiguration().getTeams()
+//            .stream()
+//            .map(GameModeTeam::getCaptain)
+//            .collect(Collectors.toSet());
+//        final Set<UUID> currentPlayers = gameMode.getCurrentConfiguration().getTeams()
+//            .stream()
+//            .flatMap(team -> team.getPlayerList().stream())
+//            .collect(Collectors.toSet());
+//        final Set<UUID> allPlayers = Sets.union(currentCaptains, currentPlayers);
 
         return
-            GuiUtils.currentGameMode.getCurrentConfiguration().getTeams()
+            gameMode.getCurrentConfiguration().getTeams()
             .stream()
-            .noneMatch(team -> team.getCaptain() == null || team.getPlayerList().isEmpty())
-                && Bukkit.getOnlinePlayers().stream().allMatch(player -> allPlayers.contains(player.getUniqueId()));
-    }
-
-    private boolean randomizedTeamsIsActive() {
-        return GuiUtils.currentGameMode != null
-            && GuiUtils.currentGameMode.getCurrentConfiguration().getRandomizedTeamsConfig().getValue();
+            .noneMatch(team -> team.getCaptain() == null);
     }
 
 }

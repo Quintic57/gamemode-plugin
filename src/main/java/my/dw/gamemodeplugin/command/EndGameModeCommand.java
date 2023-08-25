@@ -1,24 +1,34 @@
 package my.dw.gamemodeplugin.command;
 
-import my.dw.gamemodeplugin.utils.GuiUtils;
+import my.dw.gamemodeplugin.model.GameMode;
+import my.dw.gamemodeplugin.ui.selectgamemode.SelectGameModeGui;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import static my.dw.gamemodeplugin.utils.GuiUtils.NAME_TO_UNIQUE_GUI;
 
 public class EndGameModeCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
         if (sender instanceof Player) {
-            final Player player = (Player) sender;
+            Player player = (Player) sender;
 
-            if (GuiUtils.currentGameMode == null) {
-                player.sendMessage("There is no game mode currently active");
+            if (args.length == 0) {
+                player.sendMessage("Expected exactly 1 argument, but got 0.");
                 return false;
             }
 
-            GuiUtils.currentGameMode.getHandler().after();
+            final String gameMode = args[0].toUpperCase();
+            try {
+                GameMode.valueOf(gameMode).getHandler().after();
+            } catch (final IllegalArgumentException e) {
+                player.sendMessage("Provided game mode " + gameMode + " is not a valid game mode");
+                return false;
+            }
+
             return true;
         }
 

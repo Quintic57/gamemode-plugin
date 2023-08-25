@@ -2,7 +2,7 @@ package my.dw.gamemodeplugin.model;
 
 
 import lombok.Getter;
-import my.dw.gamemodeplugin.utils.GuiUtils;
+import my.dw.gamemodeplugin.utils.GameModeUtils;
 import org.bukkit.ChatColor;
 
 import java.util.ArrayList;
@@ -81,8 +81,8 @@ public class GameModeConfiguration {
         teams.clear();
         final Random random = new Random();
         final List<ChatColor> randomColors = random
-            .ints(numberOfTeams, 0, GuiUtils.MAX_NUMBER_OF_TEAMS)
-            .mapToObj(GuiUtils.TEAM_COLOR_OPTIONS::get)
+            .ints(numberOfTeams, 0, GameModeUtils.MAX_NUMBER_OF_TEAMS)
+            .mapToObj(GameModeUtils.TEAM_COLOR_OPTIONS::get)
             .collect(Collectors.toList());
         for (int i = 0; i < numberOfTeams; i++) {
             teams.add(new GameModeTeam("Team " + (i + 1), randomColors.get(i)));

@@ -1,8 +1,12 @@
 package my.dw.gamemodeplugin.ui.selectgamemode.setupgamemode.configuregamemodeoptions;
 
 import my.dw.gamemodeplugin.model.ConfigurationValue;
-import my.dw.gamemodeplugin.ui.*;
-import my.dw.gamemodeplugin.utils.GuiUtils;
+import my.dw.gamemodeplugin.ui.ChildGui;
+import my.dw.gamemodeplugin.ui.DynamicInventory;
+import my.dw.gamemodeplugin.ui.GuiFunction;
+import my.dw.gamemodeplugin.ui.GuiType;
+import my.dw.gamemodeplugin.ui.InventoryGui;
+import my.dw.gamemodeplugin.ui.ItemKey;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -10,7 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class OptionConfigurationBaseGui<T> extends InventoryGui implements DynamicInventory {
+public class OptionConfigurationBaseGui<T> extends ChildGui implements DynamicInventory {
 
     private final Supplier<ConfigurationValue<T>> getterFunction;
 
@@ -21,7 +25,7 @@ public class OptionConfigurationBaseGui<T> extends InventoryGui implements Dynam
                                       final InventoryGui parentGui,
                                       final Supplier<ConfigurationValue<T>> getterFunction,
                                       final Consumer<T> setterFunction) {
-        super(guiName, inventorySize, parentGui);
+        super(guiName, GuiType.COMMON, inventorySize, parentGui);
         this.getterFunction = getterFunction;
         this.setterFunction = setterFunction;
     }
@@ -44,10 +48,6 @@ public class OptionConfigurationBaseGui<T> extends InventoryGui implements Dynam
     }
 
     public String getConfigValue() {
-        if (GuiUtils.currentGameMode == null || getterFunction.get() == null) {
-            return "Current Value: N/A";
-        }
-
         return "Current Value: " + getterFunction.get().getValue();
     }
 }

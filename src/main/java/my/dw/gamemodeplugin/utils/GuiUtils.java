@@ -1,53 +1,34 @@
 package my.dw.gamemodeplugin.utils;
 
-import my.dw.gamemodeplugin.model.GameMode;
+import my.dw.gamemodeplugin.ui.BaseGui;
+import my.dw.gamemodeplugin.ui.ChildGui;
+import my.dw.gamemodeplugin.ui.GuiType;
 import my.dw.gamemodeplugin.ui.InventoryGui;
 import my.dw.gamemodeplugin.ui.selectgamemode.SelectGameModeGui;
-import org.bukkit.ChatColor;
 import org.bukkit.inventory.Inventory;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class GuiUtils {
 
-    public static final List<ChatColor> TEAM_COLOR_OPTIONS;
-    public static final int MAX_NUMBER_OF_TEAMS;
-    public static final Map<String, InventoryGui> NAME_TO_BASE_GUI;
+    public static final Map<String, InventoryGui> NAME_TO_UNIQUE_GUI;
     public static final Map<Inventory, InventoryGui> INVENTORY_TO_GUI;
 
-    // TODO: This is crusty, should probably be stored as metadata in the metadata container
-    public static GameMode currentGameMode;
-
     static {
-        TEAM_COLOR_OPTIONS = List.of(
-            ChatColor.AQUA,
-            ChatColor.BLUE,
-            ChatColor.DARK_AQUA,
-            ChatColor.DARK_BLUE,
-            ChatColor.DARK_GRAY,
-            ChatColor.DARK_GREEN,
-            ChatColor.DARK_PURPLE,
-            ChatColor.DARK_RED,
-            ChatColor.GOLD,
-            ChatColor.GRAY,
-            ChatColor.GREEN,
-            ChatColor.LIGHT_PURPLE,
-            ChatColor.RED,
-            ChatColor.WHITE,
-            ChatColor.YELLOW
-        );
-        MAX_NUMBER_OF_TEAMS = TEAM_COLOR_OPTIONS.size();
-        NAME_TO_BASE_GUI = new HashMap<>();
+        NAME_TO_UNIQUE_GUI = new HashMap<>();
         INVENTORY_TO_GUI = new HashMap<>();
         registerBaseGuis(new SelectGameModeGui());
     }
 
     private static void registerBaseGuis(final InventoryGui... guis) {
         for (InventoryGui gui: guis) {
-            NAME_TO_BASE_GUI.put(gui.getGuiName(), gui);
+            if (!(gui instanceof BaseGui)) {
+                throw new IllegalArgumentException("Only base guis can be registered from the base method");
+            }
+
             INVENTORY_TO_GUI.put(gui.getInventory(), gui);
+            NAME_TO_UNIQUE_GUI.put(gui.getName(), gui);
             registerChildGuis(gui);
         }
     }
@@ -57,9 +38,15 @@ public class GuiUtils {
             return;
         }
 
-        for (final Map.Entry<Inventory, InventoryGui> childGuiEntry: gui.getChildGuis().entrySet()) {
-            INVENTORY_TO_GUI.put(childGuiEntry.getKey(), childGuiEntry.getValue());
-            registerChildGuis(childGuiEntry.getValue());
+        for (final ChildGui childGui: gui.getChildGuis()) {
+            if (INVENTORY_TO_GUI.containsKey(childGui.getInventory())) {
+                continue;
+            }
+            INVENTORY_TO_GUI.put(childGui.getInventory(), childGui);
+            if (childGui.getType() == GuiType.UNIQUE) {
+                NAME_TO_UNIQUE_GUI.put(childGui.getName(), childGui);
+            }
+            registerChildGuis(childGui);
         }
     }
 

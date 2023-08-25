@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
@@ -12,48 +11,32 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-// TODO: Might have to split this into base/unique/common InventoryGuis, where base/unique guis have unique names and thus can be
-//  accessed from anywhere in the code, whereas common guis can have different names and have to be indexed by inventory object
+// TODO: Should prob move this to a common library since it's used by both plugins
 public abstract class InventoryGui {
 
-    protected final String guiName;
+    private final String name;
+
+    private final GuiType type;
 
     protected final Inventory inventory;
 
     protected final Map<ItemKey, GuiFunction> itemToGuiFunction;
 
-    protected final InventoryGui parentGui;
+    protected final Set<ChildGui> childGuis;
 
-    protected final Map<Inventory, InventoryGui> childGuis;
-
-    public InventoryGui(final String guiName,
-                        final int inventorySize,
-                        final InventoryGui parentGui) {
-        this.guiName = guiName;
-        this.inventory = Bukkit.createInventory(null, inventorySize, guiName);
+    public InventoryGui(final String name,
+                        final GuiType type,
+                        final int inventorySize) {
+        this.name = name;
+        this.type = type;
+        this.inventory = Bukkit.createInventory(null, Math.min(inventorySize, 54), name);
         this.itemToGuiFunction = new HashMap<>();
-        this.parentGui = parentGui;
-        this.childGuis = new LinkedHashMap<>();
-
-        final ItemStack backButtonItem = createDisplayItem(Material.BARRIER, "Go Back");
-        final GuiFunction backButtonFunction = event -> {
-            final Player player = (Player) event.getWhoClicked();
-            if (parentGui == null) {
-                player.sendMessage("There is no page to go back to");
-                return;
-            }
-            if (parentGui instanceof DynamicInventory) {
-                ((DynamicInventory) parentGui).refreshInventory();
-            }
-            parentGui.openInventory(player);
-        };
-        this.itemToGuiFunction.put(ItemKey.generate(backButtonItem), backButtonFunction);
-        this.inventory.setItem(inventorySize - 1, backButtonItem);
+        this.childGuis = new LinkedHashSet<>();
     }
 
     protected static ItemStack createDisplayItem(final Material itemMaterial,
@@ -75,28 +58,23 @@ public abstract class InventoryGui {
         return displayItem;
     }
 
-    public String getGuiName() {
-        return guiName;
+    public String getName() {
+        return name;
+    }
+
+    public GuiType getType() {
+        return type;
     }
 
     public Inventory getInventory() {
         return inventory;
     }
 
-    public Map<Inventory, InventoryGui> getChildGuis() {
+    public Set<ChildGui> getChildGuis() {
         return childGuis;
     }
 
-    protected void clearInventory() {
-        final ItemStack backButton = inventory.getItem(inventory.getSize() - 1);
-        if (backButton == null) {
-            throw new IllegalStateException("Back button can never be null");
-        }
-
-        inventory.clear();
-        inventory.setItem(inventory.getSize() - 1, backButton);
-        itemToGuiFunction.keySet().retainAll(Set.of(ItemKey.generate(backButton)));
-    }
+    protected abstract void clearInventory();
 
     public void openInventory(final HumanEntity entity) {
         if (this instanceof DynamicInventory) {

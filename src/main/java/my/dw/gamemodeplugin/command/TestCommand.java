@@ -1,6 +1,6 @@
 package my.dw.gamemodeplugin.command;
 
-import my.dw.gamemodeplugin.utils.GuiUtils;
+import my.dw.gamemodeplugin.model.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -15,7 +15,7 @@ public class TestCommand implements CommandExecutor {
         if (sender instanceof Player) {
             final Player player = (Player) sender;
             player.sendMessage("Team Names: "
-                + GuiUtils.currentGameMode.getCurrentConfiguration().getTeams()
+                + GameMode.DEATHMATCH.getCurrentConfiguration().getTeams()
                 .stream().map(team -> team.getColor() + team.getName()).collect(Collectors.joining(", ")));
             return true;
         }
