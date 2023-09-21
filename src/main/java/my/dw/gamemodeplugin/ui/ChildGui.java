@@ -29,19 +29,19 @@ public abstract class ChildGui extends InventoryGui {
             }
             parentGui.openInventory(player);
         };
-        this.itemToGuiFunction.put(ItemKey.generate(backButtonItem), backButtonFunction);
-        this.inventory.setItem(inventorySize - 1, backButtonItem);
+        setGuiFunction(ItemKey.generate(backButtonItem), backButtonFunction);
+        getInventory().setItem(inventorySize - 1, backButtonItem);
     }
 
     @Override
     protected void clearInventory() {
-        final ItemStack backButton = inventory.getItem(inventory.getSize() - 1);
+        final ItemStack backButton = getInventory().getItem(getInventory().getSize() - 1);
         if (backButton == null) {
             throw new IllegalStateException("Back button can never be null");
         }
-        inventory.clear();
-        inventory.setItem(inventory.getSize() - 1, backButton);
-        itemToGuiFunction.keySet().retainAll(Set.of(ItemKey.generate(backButton)));
+        getInventory().clear();
+        getInventory().setItem(getInventory().getSize() - 1, backButton);
+        getItemToGuiFunction().keySet().retainAll(Set.of(ItemKey.generate(backButton)));
     }
 
 }

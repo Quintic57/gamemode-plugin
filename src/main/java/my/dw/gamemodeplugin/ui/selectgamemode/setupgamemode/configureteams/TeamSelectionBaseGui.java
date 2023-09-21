@@ -66,8 +66,7 @@ public class TeamSelectionBaseGui extends ChildGui implements DynamicInventory {
                     final Player teamCaptain = (Player) event.getWhoClicked();
                     parentGui.openInventory(teamCaptain);
                 };
-                itemToGuiFunction.put(ItemKey.generate(guiItem), guiFunction);
-                inventory.addItem(guiItem);
+                addGuiItem(guiItem, guiFunction);
         });
     }
 

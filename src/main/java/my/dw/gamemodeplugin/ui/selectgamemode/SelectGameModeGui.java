@@ -4,7 +4,6 @@ import my.dw.gamemodeplugin.model.GameMode;
 import my.dw.gamemodeplugin.ui.BaseGui;
 import my.dw.gamemodeplugin.ui.ChildGui;
 import my.dw.gamemodeplugin.ui.GuiFunction;
-import my.dw.gamemodeplugin.ui.ItemKey;
 import my.dw.gamemodeplugin.ui.selectgamemode.setupgamemode.SetUpGameModeGui;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -24,7 +23,7 @@ public class SelectGameModeGui extends BaseGui {
         // game modes displayed in alphabetical order
         Arrays.stream(GameMode.values()).sorted((Comparator.comparing(Enum::name))).forEach(gm -> {
             final ChildGui setUpGameMode = new SetUpGameModeGui(this, gm);
-            childGuis.add(setUpGameMode);
+            addChildGui(setUpGameMode);
 
             final ItemStack guiItem = getDisplayItem(gm);
             final GuiFunction guiFunction = event -> {
@@ -32,8 +31,7 @@ public class SelectGameModeGui extends BaseGui {
                 gm.getHandler().before(player);
                 setUpGameMode.openInventory(player);
             };
-            itemToGuiFunction.put(ItemKey.generate(guiItem), guiFunction);
-            inventory.addItem(guiItem);
+            addGuiItem(guiItem, guiFunction);
         });
     }
 

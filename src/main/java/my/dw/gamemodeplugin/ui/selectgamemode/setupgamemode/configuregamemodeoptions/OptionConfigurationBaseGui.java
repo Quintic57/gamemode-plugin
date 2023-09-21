@@ -42,8 +42,7 @@ public class OptionConfigurationBaseGui<T> extends ChildGui implements DynamicIn
                 final Player player = (Player) event.getWhoClicked();
                 parentGui.openInventory(player);
             };
-            itemToGuiFunction.put(ItemKey.generate(guiItem), guiFunction);
-            inventory.addItem(guiItem);
+            addGuiItem(guiItem, guiFunction);
         });
     }
 

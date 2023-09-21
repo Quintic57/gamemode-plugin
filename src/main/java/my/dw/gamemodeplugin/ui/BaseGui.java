@@ -8,7 +8,7 @@ public abstract class BaseGui extends InventoryGui {
 
     @Override
     protected void clearInventory() {
-        inventory.clear();
+        getInventory().clear();
     }
 
 }

@@ -36,7 +36,7 @@ public class SelectPlayersGui extends ChildGui implements DynamicInventory {
                 player -> gameMode.getCurrentConfiguration().getTeams().get(i).getPlayerList().add(player),
                 gameMode
             );
-            childGuis.add(teamGui);
+            addChildGui(teamGui);
         });
     }
 
@@ -44,7 +44,7 @@ public class SelectPlayersGui extends ChildGui implements DynamicInventory {
     public void refreshInventory() {
         clearInventory();
 
-        childGuis
+        getChildGuis()
             .stream()
             .filter(gui -> gui instanceof TeamSelectionBaseGui)
             .map(gui -> (TeamSelectionBaseGui) gui)
@@ -56,8 +56,7 @@ public class SelectPlayersGui extends ChildGui implements DynamicInventory {
                     List.of(gui.getConfigValue())
                 );
                 final GuiFunction guiFunction = event -> gui.openInventory(event.getWhoClicked());
-                itemToGuiFunction.put(ItemKey.generate(guiItem), guiFunction);
-                inventory.addItem(guiItem);
+                addGuiItem(guiItem, guiFunction);
             });
     }
 

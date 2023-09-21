@@ -29,28 +29,27 @@ public class ConfigureTeamsGui extends ChildGui implements ConfiguredInventory, 
 
         this.gameMode = gameMode;
         final ChildGui selectCaptainsGui = new SelectCaptainsGui(this, gameMode);
-        childGuis.add(selectCaptainsGui);
+        addChildGui(selectCaptainsGui);
         final ChildGui selectTeamsGui = new SelectPlayersGui(this, gameMode);
-        childGuis.add(selectTeamsGui);
+        addChildGui(selectTeamsGui);
     }
 
     @Override
     public void refreshInventory() {
         clearInventory();
 
-        for (ChildGui childGui: childGuis) {
+        for (ChildGui childGui: getChildGuis()) {
             final ItemStack guiItem = createDisplayItem(Material.PAPER, childGui.getName());
             final GuiFunction guiFunction = gameMode.getCurrentConfiguration().getRandomizedTeamsConfig().getValue()
                 ? event -> event.getWhoClicked().sendMessage("Button disabled, Randomized Teams configuration is set to true")
                 : event -> childGui.openInventory(event.getWhoClicked());
-            itemToGuiFunction.put(ItemKey.generate(guiItem), guiFunction);
-            inventory.addItem(guiItem);
+            addGuiItem(guiItem, guiFunction);
         }
         final ItemStack resetConfigurationItem = createDisplayItem(Material.PAPER, "Reset Configuration");
         final GuiFunction resetConfigurationFunction = event
             -> gameMode.getCurrentConfiguration().resetTeams();
-        this.itemToGuiFunction.put(ItemKey.generate(resetConfigurationItem), resetConfigurationFunction);
-        this.inventory.setItem(7, resetConfigurationItem);
+        setGuiFunction(ItemKey.generate(resetConfigurationItem), resetConfigurationFunction);
+        getInventory().setItem(7, resetConfigurationItem);
     }
 
     @Override

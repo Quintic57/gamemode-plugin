@@ -20,14 +20,10 @@ import java.util.Set;
 public abstract class InventoryGui {
 
     private final String name;
-
     private final GuiType type;
-
-    protected final Inventory inventory;
-
-    protected final Map<ItemKey, GuiFunction> itemToGuiFunction;
-
-    protected final Set<ChildGui> childGuis;
+    private final Inventory inventory;
+    private final Map<ItemKey, GuiFunction> itemToGuiFunction;
+    private final Set<ChildGui> childGuis;
 
     public InventoryGui(final String name,
                         final GuiType type,
@@ -37,6 +33,57 @@ public abstract class InventoryGui {
         this.inventory = Bukkit.createInventory(null, Math.min(inventorySize, 54), name);
         this.itemToGuiFunction = new HashMap<>();
         this.childGuis = new LinkedHashSet<>();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public GuiType getType() {
+        return type;
+    }
+
+    public Inventory getInventory() {
+        return inventory;
+    }
+
+    protected Map<ItemKey, GuiFunction> getItemToGuiFunction() {
+        return itemToGuiFunction;
+    }
+
+    protected void setGuiFunction(final ItemKey itemKey, final GuiFunction guiFunction) {
+        itemToGuiFunction.put(itemKey, guiFunction);
+    }
+
+    protected void addGuiItem(final ItemStack guiItem, final GuiFunction guiFunction) {
+        itemToGuiFunction.put(ItemKey.generate(guiItem), guiFunction);
+        inventory.addItem(guiItem);
+    }
+
+    public Set<ChildGui> getChildGuis() {
+        return childGuis;
+    }
+
+    protected void addChildGui(final ChildGui childGui) {
+        childGuis.add(childGui);
+    }
+
+    public void openInventory(final HumanEntity entity) {
+        if (this instanceof DynamicInventory) {
+            ((DynamicInventory) this).refreshInventory();
+        }
+        entity.openInventory(inventory);
+    }
+
+    public boolean handleOnInventoryClickEvent(final InventoryClickEvent event) {
+        final GuiFunction guiFunction = itemToGuiFunction.get(ItemKey.generate(event.getCurrentItem()));
+        if (guiFunction == null) {
+            event.getWhoClicked().sendMessage("There is no functionality implemented for this button");
+            return false;
+        }
+
+        guiFunction.execute(event);
+        return true;
     }
 
     protected static ItemStack createDisplayItem(final Material itemMaterial,
@@ -58,40 +105,6 @@ public abstract class InventoryGui {
         return displayItem;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public GuiType getType() {
-        return type;
-    }
-
-    public Inventory getInventory() {
-        return inventory;
-    }
-
-    public Set<ChildGui> getChildGuis() {
-        return childGuis;
-    }
-
     protected abstract void clearInventory();
-
-    public void openInventory(final HumanEntity entity) {
-        if (this instanceof DynamicInventory) {
-            ((DynamicInventory) this).refreshInventory();
-        }
-        entity.openInventory(inventory);
-    }
-
-    public boolean handleOnInventoryClickEvent(final InventoryClickEvent event) {
-        final GuiFunction guiFunction = itemToGuiFunction.get(ItemKey.generate(event.getCurrentItem()));
-        if (guiFunction == null) {
-            event.getWhoClicked().sendMessage("There is no functionality implemented for this button");
-            return false;
-        }
-
-        guiFunction.execute(event);
-        return true;
-    }
 
 }

@@ -30,42 +30,42 @@ public class ConfigureGameModeOptionsGui extends ChildGui implements ConfiguredI
                 gameMode.getCurrentConfiguration().setNumberOfTeamsValue(value);
                 gameMode.getCurrentConfiguration().registerNewTeams(value);
             });
-        childGuis.add(numberOfTeamsGui);
+        addChildGui(numberOfTeamsGui);
         final ChildGui randomizedTeamsGui = new OptionConfigurationBaseGui<>(
             "Randomized Teams",
             9,
             this,
             () -> gameMode.getCurrentConfiguration().getRandomizedTeamsConfig(),
             value -> gameMode.getCurrentConfiguration().setRandomizedTeamsValue(value));
-        childGuis.add(randomizedTeamsGui);
+        addChildGui(randomizedTeamsGui);
         final ChildGui scoreLimitGui = new OptionConfigurationBaseGui<>(
             "Score Limit",
             9,
             this,
             () -> gameMode.getCurrentConfiguration().getScoreLimitConfig(),
             value -> gameMode.getCurrentConfiguration().setScoreLimitValue(value));
-        childGuis.add(scoreLimitGui);
+        addChildGui(scoreLimitGui);
         final ChildGui timeLimitGui = new OptionConfigurationBaseGui<>(
             "Time Limit (Minutes)",
             9,
             this,
             () -> gameMode.getCurrentConfiguration().getTimeLimitInMinutesConfig(),
             value -> gameMode.getCurrentConfiguration().setTimeLimitInMinutesValue(value));
-        childGuis.add(timeLimitGui);
+        addChildGui(timeLimitGui);
         final ChildGui foodEnabledGui = new OptionConfigurationBaseGui<>(
             "Food Enabled",
             9,
             this,
             () -> gameMode.getCurrentConfiguration().getFoodEnabledConfig(),
             value -> gameMode.getCurrentConfiguration().setFoodEnabledValue(value));
-        childGuis.add(foodEnabledGui);
+        addChildGui(foodEnabledGui);
     }
 
     @Override
     public void refreshInventory() {
         clearInventory();
 
-        childGuis
+        getChildGuis()
             .stream()
             .filter(gui -> gui instanceof OptionConfigurationBaseGui)
             .map(gui -> (OptionConfigurationBaseGui<?>) gui)
@@ -76,8 +76,7 @@ public class ConfigureGameModeOptionsGui extends ChildGui implements ConfiguredI
                     List.of(gui.getConfigValue())
                 );
                 final GuiFunction guiFunction = event -> gui.openInventory(event.getWhoClicked());
-                itemToGuiFunction.put(ItemKey.generate(guiItem), guiFunction);
-                inventory.addItem(guiItem);
+                addGuiItem(guiItem, guiFunction);
             });
 
         final ItemStack resetConfigurationItem = createDisplayItem(Material.PAPER, "Reset Configuration");
@@ -85,8 +84,8 @@ public class ConfigureGameModeOptionsGui extends ChildGui implements ConfiguredI
             gameMode.getCurrentConfiguration().reset();
             refreshInventory();
         };
-        this.itemToGuiFunction.put(ItemKey.generate(resetConfigurationItem), resetConfigurationFunction);
-        this.inventory.setItem(7, resetConfigurationItem);
+        setGuiFunction(ItemKey.generate(resetConfigurationItem), resetConfigurationFunction);
+        getInventory().setItem(7, resetConfigurationItem);
     }
 
     @Override

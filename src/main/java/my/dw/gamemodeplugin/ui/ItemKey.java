@@ -8,7 +8,6 @@ import java.util.Objects;
 public class ItemKey {
 
     private final Material material;
-
     private final String displayName;
 
     public ItemKey(final Material material, final String displayName) {

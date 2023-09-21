@@ -33,16 +33,16 @@ public class SetUpGameModeGui extends ChildGui implements DynamicInventory {
 
         this.gameMode = gameMode;
         final ChildGui configureGameModeGui = new ConfigureGameModeOptionsGui(this, gameMode);
-        childGuis.add(configureGameModeGui);
+        addChildGui(configureGameModeGui);
         this.configureTeamsGui = new ConfigureTeamsGui(this, gameMode);
-        childGuis.add(configureTeamsGui);
+        addChildGui(configureTeamsGui);
     }
 
     @Override
     public void refreshInventory() {
         clearInventory();
 
-        for (final ChildGui childGui: childGuis) {
+        for (final ChildGui childGui: getChildGuis()) {
             if (!(childGui instanceof ConfiguredInventory)) {
                 continue;
             }
@@ -53,18 +53,17 @@ public class SetUpGameModeGui extends ChildGui implements DynamicInventory {
                 List.of(((ConfiguredInventory) childGui).isConfigured() ? CONFIGURED : NOT_CONFIGURED)
             );
             final GuiFunction guiFunction = event -> childGui.openInventory(event.getWhoClicked());
-            itemToGuiFunction.put(ItemKey.generate(guiItem), guiFunction);
-            inventory.addItem(guiItem);
+            addGuiItem(guiItem, guiFunction);
         }
         if (gameMode.getCurrentConfiguration().getNumberOfTeamsConfig().getValue() == 0) {
-            itemToGuiFunction.put(new ItemKey(Material.PAPER, configureTeamsGui.getName()),
+            setGuiFunction(new ItemKey(Material.PAPER, configureTeamsGui.getName()),
                 event -> event.getWhoClicked().sendMessage("Button disabled, current Number of Teams is 0"));
         }
 
         final ItemStack startGameItem = createDisplayItem(Material.SPECTRAL_ARROW, "Start Game");
         final GuiFunction startGameFunction = event -> {
-            final Set<ItemStack> unconfiguredOptions = Arrays.stream(inventory.getStorageContents())
-                .limit(childGuis.size())
+            final Set<ItemStack> unconfiguredOptions = Arrays.stream(getInventory().getStorageContents())
+                .limit(getChildGuis().size())
                 .filter(item -> item.getItemMeta().getLore().contains(NOT_CONFIGURED))
                 .collect(Collectors.toSet());
             if (!unconfiguredOptions.isEmpty()) {
@@ -77,8 +76,8 @@ public class SetUpGameModeGui extends ChildGui implements DynamicInventory {
             gameMode.getHandler().startGame();
             event.getWhoClicked().closeInventory();
         };
-        itemToGuiFunction.put(ItemKey.generate(startGameItem), startGameFunction);
-        inventory.setItem(7, startGameItem);
+        setGuiFunction(ItemKey.generate(startGameItem), startGameFunction);
+        getInventory().setItem(7, startGameItem);
     }
 
 }
