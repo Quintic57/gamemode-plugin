@@ -14,6 +14,7 @@ public class SelectGameModeCommand implements CommandExecutor {
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
         if (sender instanceof Player) {
             final Player player = (Player) sender;
+            player.getInventory().clear();
 
             NAME_TO_UNIQUE_GUI.get(SelectGameModeGui.NAME).openInventory(player);
             return true;

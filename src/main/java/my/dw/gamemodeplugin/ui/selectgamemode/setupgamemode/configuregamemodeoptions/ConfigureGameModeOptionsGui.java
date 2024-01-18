@@ -1,10 +1,10 @@
 package my.dw.gamemodeplugin.ui.selectgamemode.setupgamemode.configuregamemodeoptions;
 
 import my.dw.gamemodeplugin.model.GameMode;
-import my.dw.gamemodeplugin.ui.ChildGui;
+import my.dw.gamemodeplugin.ui.ChildInventoryGui;
 import my.dw.gamemodeplugin.ui.ConfiguredInventory;
 import my.dw.gamemodeplugin.ui.DynamicInventory;
-import my.dw.gamemodeplugin.ui.GuiFunction;
+import my.dw.gamemodeplugin.ui.InventoryGuiFunction;
 import my.dw.gamemodeplugin.ui.GuiType;
 import my.dw.gamemodeplugin.ui.InventoryGui;
 import my.dw.gamemodeplugin.ui.ItemKey;
@@ -12,8 +12,9 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
+import java.util.stream.Stream;
 
-public class ConfigureGameModeOptionsGui extends ChildGui implements ConfiguredInventory, DynamicInventory {
+public class ConfigureGameModeOptionsGui extends ChildInventoryGui implements ConfiguredInventory, DynamicInventory {
 
     private final GameMode gameMode;
 
@@ -21,44 +22,49 @@ public class ConfigureGameModeOptionsGui extends ChildGui implements ConfiguredI
         super("Game Mode Options", GuiType.COMMON, 9, parentGui);
 
         this.gameMode = gameMode;
-        final ChildGui numberOfTeamsGui = new OptionConfigurationBaseGui<>(
+
+        // Configurations with additional functions
+        final ChildInventoryGui numberOfTeamsConfigGui = new GameModeConfigurationElementGui<>(
             "Number of Teams",
             9,
             this,
-            () -> gameMode.getCurrentConfiguration().getNumberOfTeamsConfig(),
-            value -> {
-                gameMode.getCurrentConfiguration().setNumberOfTeamsValue(value);
-                gameMode.getCurrentConfiguration().registerNewTeams(value);
+            gameMode.getConfiguration().getNumberOfTeamsConfig(),
+            () -> gameMode.getConfiguration().registerNewTeams(
+                gameMode.getConfiguration().getNumberOfTeamsConfig().getCurrentValue())
+        );
+        addChildGui(numberOfTeamsConfigGui);
+
+        // All other configurations
+        Stream.of(gameMode.getConfiguration().getMandatoryConfigMap(), gameMode.getConfiguration().getCustomConfigMap())
+            .flatMap(map -> map.entrySet().stream())
+            .filter(entry -> !List.of("Number of Teams").contains(entry.getKey()))
+            .forEach(entry -> {
+                final ChildInventoryGui configGui = new GameModeConfigurationElementGui<>(
+                    entry.getKey(),
+                    9,
+                    this,
+                    entry.getValue()
+                );
+                addChildGui(configGui);
             });
-        addChildGui(numberOfTeamsGui);
-        final ChildGui randomizedTeamsGui = new OptionConfigurationBaseGui<>(
-            "Randomized Teams",
-            9,
-            this,
-            () -> gameMode.getCurrentConfiguration().getRandomizedTeamsConfig(),
-            value -> gameMode.getCurrentConfiguration().setRandomizedTeamsValue(value));
-        addChildGui(randomizedTeamsGui);
-        final ChildGui scoreLimitGui = new OptionConfigurationBaseGui<>(
-            "Score Limit",
-            9,
-            this,
-            () -> gameMode.getCurrentConfiguration().getScoreLimitConfig(),
-            value -> gameMode.getCurrentConfiguration().setScoreLimitValue(value));
-        addChildGui(scoreLimitGui);
-        final ChildGui timeLimitGui = new OptionConfigurationBaseGui<>(
-            "Time Limit (Minutes)",
-            9,
-            this,
-            () -> gameMode.getCurrentConfiguration().getTimeLimitInMinutesConfig(),
-            value -> gameMode.getCurrentConfiguration().setTimeLimitInMinutesValue(value));
-        addChildGui(timeLimitGui);
-        final ChildGui foodEnabledGui = new OptionConfigurationBaseGui<>(
-            "Food Enabled",
-            9,
-            this,
-            () -> gameMode.getCurrentConfiguration().getFoodEnabledConfig(),
-            value -> gameMode.getCurrentConfiguration().setFoodEnabledValue(value));
-        addChildGui(foodEnabledGui);
+//        gameMode.getConfiguration().getMandatoryConfigMap().forEach((name, config) -> {
+//            final ChildInventoryGui configGui = new GameModeConfigurationBaseGui<>(
+//                name,
+//                9,
+//                this,
+//                config
+//            );
+//            addChildGui(configGui);
+//        });
+//        gameMode.getConfiguration().getCustomConfigMap().forEach((name, config) -> {
+//            final ChildInventoryGui customConfigGui = new GameModeConfigurationBaseGui<>(
+//                name,
+//                9,
+//                this,
+//                config
+//            );
+//            addChildGui(customConfigGui);
+//        });
     }
 
     @Override
@@ -67,21 +73,21 @@ public class ConfigureGameModeOptionsGui extends ChildGui implements ConfiguredI
 
         getChildGuis()
             .stream()
-            .filter(gui -> gui instanceof OptionConfigurationBaseGui)
-            .map(gui -> (OptionConfigurationBaseGui<?>) gui)
+            .filter(gui -> gui instanceof GameModeConfigurationElementGui)
+            .map(gui -> (GameModeConfigurationElementGui<?>) gui)
             .forEach(gui -> {
                 final ItemStack guiItem = createDisplayItem(
                     Material.PAPER,
                     gui.getName(),
-                    List.of(gui.getConfigValue())
+                    List.of(gui.getCurrentConfigValueAsString())
                 );
-                final GuiFunction guiFunction = event -> gui.openInventory(event.getWhoClicked());
+                final InventoryGuiFunction guiFunction = event -> gui.openInventory(event.getWhoClicked());
                 addGuiItem(guiItem, guiFunction);
             });
 
         final ItemStack resetConfigurationItem = createDisplayItem(Material.PAPER, "Reset Configuration");
-        final GuiFunction resetConfigurationFunction = event -> {
-            gameMode.getCurrentConfiguration().reset();
+        final InventoryGuiFunction resetConfigurationFunction = event -> {
+            gameMode.getConfiguration().reset();
             refreshInventory();
         };
         setGuiFunction(ItemKey.generate(resetConfigurationItem), resetConfigurationFunction);

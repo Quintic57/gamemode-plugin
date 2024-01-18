@@ -8,7 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-public class GuiInventoryListener implements Listener {
+public class InventoryGuiListener implements Listener {
 
     @EventHandler
     public void onInventoryClickEvent(final InventoryClickEvent event) {

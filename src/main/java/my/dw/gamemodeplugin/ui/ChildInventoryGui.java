@@ -6,24 +6,23 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Set;
 
-public abstract class ChildGui extends InventoryGui {
+public abstract class ChildInventoryGui extends InventoryGui {
 
-    protected final InventoryGui parentGui;
+    private final InventoryGui parentGui;
 
-    public ChildGui(final String name,
-                    final GuiType type,
-                    final int inventorySize,
-                    final InventoryGui parentGui) {
+    public ChildInventoryGui(final String name,
+                             final GuiType type,
+                             final int inventorySize,
+                             final InventoryGui parentGui) {
         super(name, type, inventorySize);
+        if (parentGui == null) {
+            throw new IllegalArgumentException("Parent GUI can not be null for ChildInventoryGuis");
+        }
         this.parentGui = parentGui;
 
         final ItemStack backButtonItem = createDisplayItem(Material.BARRIER, "Go Back");
-        final GuiFunction backButtonFunction = event -> {
+        final InventoryGuiFunction backButtonFunction = event -> {
             final Player player = (Player) event.getWhoClicked();
-            if (parentGui == null) {
-                player.sendMessage("There is no page to go back to");
-                return;
-            }
             if (parentGui instanceof DynamicInventory) {
                 ((DynamicInventory) parentGui).refreshInventory();
             }
@@ -31,6 +30,10 @@ public abstract class ChildGui extends InventoryGui {
         };
         setGuiFunction(ItemKey.generate(backButtonItem), backButtonFunction);
         getInventory().setItem(inventorySize - 1, backButtonItem);
+    }
+
+    protected InventoryGui getParentGui() {
+        return parentGui;
     }
 
     @Override

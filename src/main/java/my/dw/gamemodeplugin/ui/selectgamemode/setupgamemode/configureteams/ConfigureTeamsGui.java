@@ -1,26 +1,20 @@
 package my.dw.gamemodeplugin.ui.selectgamemode.setupgamemode.configureteams;
 
-import com.google.common.collect.Sets;
 import my.dw.gamemodeplugin.model.GameMode;
-import my.dw.gamemodeplugin.model.GameModeTeam;
-import my.dw.gamemodeplugin.ui.ChildGui;
+import my.dw.gamemodeplugin.ui.ChildInventoryGui;
 import my.dw.gamemodeplugin.ui.ConfiguredInventory;
 import my.dw.gamemodeplugin.ui.DynamicInventory;
-import my.dw.gamemodeplugin.ui.GuiFunction;
+import my.dw.gamemodeplugin.ui.Gui;
 import my.dw.gamemodeplugin.ui.GuiType;
 import my.dw.gamemodeplugin.ui.InventoryGui;
+import my.dw.gamemodeplugin.ui.InventoryGuiFunction;
 import my.dw.gamemodeplugin.ui.ItemKey;
 import my.dw.gamemodeplugin.ui.selectgamemode.setupgamemode.configureteams.selectcaptains.SelectCaptainsGui;
 import my.dw.gamemodeplugin.ui.selectgamemode.setupgamemode.configureteams.selectplayers.SelectPlayersGui;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-public class ConfigureTeamsGui extends ChildGui implements ConfiguredInventory, DynamicInventory {
+public class ConfigureTeamsGui extends ChildInventoryGui implements ConfiguredInventory, DynamicInventory {
     
     private final GameMode gameMode;
 
@@ -28,9 +22,9 @@ public class ConfigureTeamsGui extends ChildGui implements ConfiguredInventory, 
         super("Configure Teams", GuiType.COMMON, 9, parentGui);
 
         this.gameMode = gameMode;
-        final ChildGui selectCaptainsGui = new SelectCaptainsGui(this, gameMode);
+        final ChildInventoryGui selectCaptainsGui = new SelectCaptainsGui(this, gameMode);
         addChildGui(selectCaptainsGui);
-        final ChildGui selectTeamsGui = new SelectPlayersGui(this, gameMode);
+        final ChildInventoryGui selectTeamsGui = new SelectPlayersGui(this, gameMode);
         addChildGui(selectTeamsGui);
     }
 
@@ -38,23 +32,23 @@ public class ConfigureTeamsGui extends ChildGui implements ConfiguredInventory, 
     public void refreshInventory() {
         clearInventory();
 
-        for (ChildGui childGui: getChildGuis()) {
+        for (final Gui childGui: getChildGuis()) {
             final ItemStack guiItem = createDisplayItem(Material.PAPER, childGui.getName());
-            final GuiFunction guiFunction = gameMode.getCurrentConfiguration().getRandomizedTeamsConfig().getValue()
+            final InventoryGuiFunction guiFunction = gameMode.getConfiguration().getRandomizedTeamsConfig().getCurrentValue()
                 ? event -> event.getWhoClicked().sendMessage("Button disabled, Randomized Teams configuration is set to true")
                 : event -> childGui.openInventory(event.getWhoClicked());
             addGuiItem(guiItem, guiFunction);
         }
         final ItemStack resetConfigurationItem = createDisplayItem(Material.PAPER, "Reset Configuration");
-        final GuiFunction resetConfigurationFunction = event
-            -> gameMode.getCurrentConfiguration().resetTeams();
+        final InventoryGuiFunction resetConfigurationFunction = event
+            -> gameMode.getConfiguration().resetTeams();
         setGuiFunction(ItemKey.generate(resetConfigurationItem), resetConfigurationFunction);
         getInventory().setItem(7, resetConfigurationItem);
     }
 
     @Override
     public boolean isConfigured() {
-        if (gameMode.getCurrentConfiguration().getNumberOfTeamsConfig().getValue() == 0) {
+        if (gameMode.getConfiguration().getNumberOfTeamsConfig().getCurrentValue() == 0) {
             return true;
         }
 
@@ -70,7 +64,7 @@ public class ConfigureTeamsGui extends ChildGui implements ConfiguredInventory, 
 //        final Set<UUID> allPlayers = Sets.union(currentCaptains, currentPlayers);
 
         return
-            gameMode.getCurrentConfiguration().getTeams()
+            gameMode.getConfiguration().getTeams()
             .stream()
             .noneMatch(team -> team.getCaptain() == null);
     }

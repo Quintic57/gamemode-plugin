@@ -3,12 +3,11 @@ package my.dw.gamemodeplugin.ui.selectgamemode.setupgamemode.configureteams.sele
 import static my.dw.gamemodeplugin.utils.GameModeUtils.MAX_NUMBER_OF_TEAMS;
 
 import my.dw.gamemodeplugin.model.GameMode;
-import my.dw.gamemodeplugin.ui.ChildGui;
+import my.dw.gamemodeplugin.ui.ChildInventoryGui;
 import my.dw.gamemodeplugin.ui.DynamicInventory;
-import my.dw.gamemodeplugin.ui.GuiFunction;
+import my.dw.gamemodeplugin.ui.InventoryGuiFunction;
 import my.dw.gamemodeplugin.ui.GuiType;
 import my.dw.gamemodeplugin.ui.InventoryGui;
-import my.dw.gamemodeplugin.ui.ItemKey;
 import my.dw.gamemodeplugin.ui.selectgamemode.setupgamemode.configureteams.TeamSelectionBaseGui;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -17,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-public class SelectCaptainsGui extends ChildGui implements DynamicInventory {
+public class SelectCaptainsGui extends ChildInventoryGui implements DynamicInventory {
     
     private final GameMode gameMode;
 
@@ -26,14 +25,14 @@ public class SelectCaptainsGui extends ChildGui implements DynamicInventory {
 
         this.gameMode = gameMode;
         IntStream.range(0, MAX_NUMBER_OF_TEAMS).forEach(i -> {
-            final ChildGui teamGui = new TeamSelectionBaseGui(
+            final ChildInventoryGui teamGui = new TeamSelectionBaseGui(
                 "Select Team " + (i + 1) + " Captain",
                 36,
                 this,
-                () -> gameMode.getCurrentConfiguration().getTeams().get(i).getCaptain() != null
-                    ? Set.of(gameMode.getCurrentConfiguration().getTeams().get(i).getCaptain())
+                () -> gameMode.getConfiguration().getTeams().get(i).getCaptain() != null
+                    ? Set.of(gameMode.getConfiguration().getTeams().get(i).getCaptain())
                     : Set.of(),
-                captain -> gameMode.getCurrentConfiguration().getTeams().get(i).setCaptain(captain),
+                captain -> gameMode.getConfiguration().getTeams().get(i).setCaptain(captain),
                 gameMode
             );
             addChildGui(teamGui);
@@ -48,14 +47,14 @@ public class SelectCaptainsGui extends ChildGui implements DynamicInventory {
             .stream()
             .filter(gui -> gui instanceof TeamSelectionBaseGui)
             .map(gui -> (TeamSelectionBaseGui) gui)
-            .limit(gameMode.getCurrentConfiguration().getTeams().size())
+            .limit(gameMode.getConfiguration().getTeams().size())
             .forEach(gui -> {
                 final ItemStack guiItem = createDisplayItem(
                     Material.PAPER,
                     gui.getName(),
                     List.of(gui.getConfigValue())
                 );
-                final GuiFunction guiFunction = event -> gui.openInventory(event.getWhoClicked());
+                final InventoryGuiFunction guiFunction = event -> gui.openInventory(event.getWhoClicked());
                 addGuiItem(guiItem, guiFunction);
             });
     }

@@ -15,7 +15,7 @@ public class TestCommand implements CommandExecutor {
         if (sender instanceof Player) {
             final Player player = (Player) sender;
             player.sendMessage("Team Names: "
-                + GameMode.DEATHMATCH.getCurrentConfiguration().getTeams()
+                + GameMode.DEATHMATCH.getConfiguration().getTeams()
                 .stream().map(team -> team.getColor() + team.getName()).collect(Collectors.joining(", ")));
             return true;
         }

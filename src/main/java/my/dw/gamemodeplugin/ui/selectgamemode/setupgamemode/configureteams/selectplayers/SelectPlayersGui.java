@@ -3,12 +3,11 @@ package my.dw.gamemodeplugin.ui.selectgamemode.setupgamemode.configureteams.sele
 import static my.dw.gamemodeplugin.utils.GameModeUtils.MAX_NUMBER_OF_TEAMS;
 
 import my.dw.gamemodeplugin.model.GameMode;
-import my.dw.gamemodeplugin.ui.ChildGui;
+import my.dw.gamemodeplugin.ui.ChildInventoryGui;
 import my.dw.gamemodeplugin.ui.DynamicInventory;
-import my.dw.gamemodeplugin.ui.GuiFunction;
+import my.dw.gamemodeplugin.ui.InventoryGuiFunction;
 import my.dw.gamemodeplugin.ui.GuiType;
 import my.dw.gamemodeplugin.ui.InventoryGui;
-import my.dw.gamemodeplugin.ui.ItemKey;
 import my.dw.gamemodeplugin.ui.selectgamemode.setupgamemode.configureteams.TeamSelectionBaseGui;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -19,7 +18,7 @@ import java.util.stream.IntStream;
 //TODO: Create a round robin team picker. Alternate opening the inventory between the team captains until all players
 // are chosen. Send message to each captain to indicate which captain is currently choosing and the results of the choice.
 // Have cancel button on UI that resets back to choosing captains.
-public class SelectPlayersGui extends ChildGui implements DynamicInventory {
+public class SelectPlayersGui extends ChildInventoryGui implements DynamicInventory {
     
     private final GameMode gameMode;
 
@@ -28,12 +27,12 @@ public class SelectPlayersGui extends ChildGui implements DynamicInventory {
 
         this.gameMode = gameMode;
         IntStream.range(0, MAX_NUMBER_OF_TEAMS).forEach(i -> {
-            final ChildGui teamGui = new TeamSelectionBaseGui(
+            final ChildInventoryGui teamGui = new TeamSelectionBaseGui(
                 "Select Team " + (i + 1) + " Players",
                 36,
                 this,
-                () -> gameMode.getCurrentConfiguration().getTeams().get(i).getPlayerList(),
-                player -> gameMode.getCurrentConfiguration().getTeams().get(i).getPlayerList().add(player),
+                () -> gameMode.getConfiguration().getTeams().get(i).getPlayerList(),
+                player -> gameMode.getConfiguration().getTeams().get(i).getPlayerList().add(player),
                 gameMode
             );
             addChildGui(teamGui);
@@ -48,14 +47,14 @@ public class SelectPlayersGui extends ChildGui implements DynamicInventory {
             .stream()
             .filter(gui -> gui instanceof TeamSelectionBaseGui)
             .map(gui -> (TeamSelectionBaseGui) gui)
-            .limit(gameMode.getCurrentConfiguration().getNumberOfTeamsConfig().getValue())
+            .limit(gameMode.getConfiguration().getNumberOfTeamsConfig().getCurrentValue())
             .forEach(gui -> {
                 final ItemStack guiItem = createDisplayItem(
                     Material.PAPER,
                     gui.getName(),
                     List.of(gui.getConfigValue())
                 );
-                final GuiFunction guiFunction = event -> gui.openInventory(event.getWhoClicked());
+                final InventoryGuiFunction guiFunction = event -> gui.openInventory(event.getWhoClicked());
                 addGuiItem(guiItem, guiFunction);
             });
     }

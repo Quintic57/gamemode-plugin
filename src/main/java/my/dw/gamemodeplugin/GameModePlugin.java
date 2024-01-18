@@ -3,7 +3,7 @@ package my.dw.gamemodeplugin;
 import my.dw.gamemodeplugin.command.EndGameModeCommand;
 import my.dw.gamemodeplugin.command.SelectGameModeCommand;
 import my.dw.gamemodeplugin.command.TestCommand;
-import my.dw.gamemodeplugin.listener.GuiInventoryListener;
+import my.dw.gamemodeplugin.listener.InventoryGuiListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class GameModePlugin extends JavaPlugin {
@@ -18,7 +18,7 @@ public final class GameModePlugin extends JavaPlugin {
         getCommand("endgamemode").setExecutor(new EndGameModeCommand());
         getCommand("selectgamemode").setExecutor(new SelectGameModeCommand());
         getCommand("test").setExecutor(new TestCommand());
-        getServer().getPluginManager().registerEvents(new GuiInventoryListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryGuiListener(), this);
     }
 
     @Override

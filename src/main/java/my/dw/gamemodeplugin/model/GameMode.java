@@ -5,40 +5,24 @@ import my.dw.gamemodeplugin.model.handlers.DeathmatchHandler;
 import my.dw.gamemodeplugin.model.handlers.DominationHandler;
 import org.bukkit.scoreboard.Criteria;
 
-import java.util.List;
 import java.util.Map;
 
 public enum GameMode {
 
     CAPTURE_THE_FLAG(
         new CaptureTheFlagHandler(),
-        new GameModeConfiguration()
-            .initNumberOfTeamsConfig(2, List.of(2, 3, 4, 5, 6))
-            .initRandomizedTeamsConfig(false)
-            .initScoreLimitConfig(5, List.of(2, 4, 5, 6, 8, 10, 15, 20))
-            .initTimeLimitInMinutesConfig(15, List.of(5, 10, 15, 20, 30, 40, 50, 60))
-            .initFoodEnabledConfig(true)
-            .initTeamsList()
+        GameModeConfiguration.CAPTURE_THE_FLAG,
+        MapConfiguration.CAPTURE_THE_FLAG
     ),
     DEATHMATCH(
         new DeathmatchHandler(),
-        new GameModeConfiguration()
-            .initNumberOfTeamsConfig(2, List.of(0, 2, 3, 4, 5, 6, 7, 8))
-            .initRandomizedTeamsConfig(false)
-            .initScoreLimitConfig(25, List.of(10, 15, 20, 25, 30, 35, 40, 50))
-            .initTimeLimitInMinutesConfig(15, List.of(5, 10, 15, 20, 30, 40, 50, 60))
-            .initFoodEnabledConfig(true)
-            .initTeamsList()
+        GameModeConfiguration.DEATHMATCH,
+        MapConfiguration.DEATHMATCH
     ),
     DOMINATION(
         new DominationHandler(),
-        new GameModeConfiguration()
-            .initNumberOfTeamsConfig(2, List.of(2, 3, 4, 5, 6))
-            .initRandomizedTeamsConfig(false)
-            .initScoreLimitConfig(100, List.of(25, 50, 75, 100, 150, 200, 250, 300))
-            .initTimeLimitInMinutesConfig(15, List.of(5, 10, 15, 20, 30, 40, 50, 60))
-            .initFoodEnabledConfig(true)
-            .initTeamsList()
+        GameModeConfiguration.DOMINATION,
+        MapConfiguration.DOMINATION
     );
 
     private final Map.Entry<String, Criteria> mainCriterion;
@@ -47,20 +31,26 @@ public enum GameMode {
 
     private final GameModeHandler handler;
 
-    private final GameModeConfiguration currentConfiguration;
+    private final GameModeConfiguration configuration;
 
-    GameMode(final GameModeHandler handler, final GameModeConfiguration currentConfiguration) {
-        this(Map.entry("Score", Criteria.DUMMY), Map.of(), handler, currentConfiguration);
+    private final MapConfiguration mapConfiguration;
+
+    GameMode(final GameModeHandler handler,
+             final GameModeConfiguration configuration,
+             final MapConfiguration mapConfiguration) {
+        this(Map.entry("Score", Criteria.DUMMY), Map.of(), handler, configuration, mapConfiguration);
     }
 
     GameMode(final Map.Entry<String, Criteria> mainCriterion,
              final Map<String, Criteria> additionalCriteria,
              final GameModeHandler handler,
-             final GameModeConfiguration currentConfiguration) {
+             final GameModeConfiguration configuration,
+             final MapConfiguration mapConfiguration) {
         this.mainCriterion = mainCriterion;
         this.additionalCriteria = additionalCriteria;
         this.handler = handler;
-        this.currentConfiguration = currentConfiguration;
+        this.configuration = configuration;
+        this.mapConfiguration = mapConfiguration;
     }
 
     public Map.Entry<String, Criteria> getMainCriterion() {
@@ -75,8 +65,12 @@ public enum GameMode {
         return handler;
     }
 
-    public GameModeConfiguration getCurrentConfiguration() {
-        return currentConfiguration;
+    public GameModeConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    public MapConfiguration getMapConfiguration() {
+        return mapConfiguration;
     }
 
 }

@@ -6,75 +6,87 @@ import my.dw.gamemodeplugin.utils.GameModeUtils;
 import org.bukkit.ChatColor;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
 @Getter
-public class GameModeConfiguration {
+public enum GameModeConfiguration {
 
-    private final ConfigurationValue<Integer> numberOfTeamsConfig;
+    CAPTURE_THE_FLAG(
+        new GameModeConfigurationElement<>("Number of Teams", 2, List.of(2, 3, 4, 5, 6)),
+        new GameModeConfigurationElement<>("Randomized Teams", false, List.of(false, true)),
+        new GameModeConfigurationElement<>("Score Limit", 5, List.of(2, 4, 5, 6, 8, 10, 15, 20)),
+        new GameModeConfigurationElement<>("Time Limit (Minutes)", 15, List.of(5, 10, 15, 20, 30, 40, 50, 60)),
+        new GameModeConfigurationElement<>("Food Enabled", true, List.of(false, true))
+    ),
+    DEATHMATCH(
+        new GameModeConfigurationElement<>("Number of Teams", 2, List.of(0, 2, 3, 4, 5, 6, 7, 8)),
+        new GameModeConfigurationElement<>("Randomized Teams", false, List.of(false, true)),
+        new GameModeConfigurationElement<>("Score Limit", 25, List.of(10, 15, 20, 25, 30, 35, 40, 50)),
+        new GameModeConfigurationElement<>("Time Limit (Minutes)", 15, List.of(5, 10, 15, 20, 30, 40, 50, 60)),
+        new GameModeConfigurationElement<>("Food Enabled", true, List.of(false, true))
+    ),
+    DOMINATION(
+        new GameModeConfigurationElement<>("Number of Teams", 2, List.of(2, 3, 4, 5, 6)),
+        new GameModeConfigurationElement<>("Randomized Teams", false, List.of(false, true)),
+        new GameModeConfigurationElement<>("Score Limit", 100, List.of(25, 50, 75, 100, 150, 200, 250, 300)),
+        new GameModeConfigurationElement<>("Time Limit (Minutes)", 15, List.of(5, 10, 15, 20, 30, 40, 50, 60)),
+        new GameModeConfigurationElement<>("Food Enabled", true, List.of(false, true)),
+        List.of(
+            new GameModeConfigurationElement<>("Number of Landmarks", 5, List.of(3, 4, 5, 6, 7, 8, 9, 10))
+        )
+    );
 
-    private final ConfigurationValue<Boolean> randomizedTeamsConfig;
-
-    private final ConfigurationValue<Integer> scoreLimitConfig;
-
-    private final ConfigurationValue<Integer> timeLimitInMinutesConfig;
-
-    private final ConfigurationValue<Boolean> foodEnabledConfig;
-
+    private final GameModeConfigurationElement<Integer> numberOfTeamsConfig;
+    private final GameModeConfigurationElement<Boolean> randomizedTeamsConfig;
+    private final GameModeConfigurationElement<Integer> scoreLimitConfig;
+    private final GameModeConfigurationElement<Integer> timeLimitInMinutesConfig;
+    private final GameModeConfigurationElement<Boolean> foodEnabledConfig;
     private final List<GameModeTeam> teams;
+    private final Map<String, GameModeConfigurationElement<?>> mandatoryConfigMap;
+    private final Map<String, GameModeConfigurationElement<Integer>> customConfigMap;
 
-    // TODO: Should probably snapshot (OPPA) the online player list when initiating select game mode, that way there's
-    //  something to reset to if players all agree to reset the team selection
-    public GameModeConfiguration() {
-        numberOfTeamsConfig = new ConfigurationValue<>();
-        randomizedTeamsConfig = new ConfigurationValue<>();
-        scoreLimitConfig = new ConfigurationValue<>();
-        timeLimitInMinutesConfig = new ConfigurationValue<>();
-        foodEnabledConfig = new ConfigurationValue<>();
+    GameModeConfiguration(final GameModeConfigurationElement<Integer> numberOfTeamsConfig,
+                          final GameModeConfigurationElement<Boolean> randomizedTeamsConfig,
+                          final GameModeConfigurationElement<Integer> scoreLimitConfig,
+                          final GameModeConfigurationElement<Integer> timeLimitInMinutesConfig,
+                          final GameModeConfigurationElement<Boolean> foodEnabledConfig) {
+        this(numberOfTeamsConfig,
+            randomizedTeamsConfig,
+            scoreLimitConfig,
+            timeLimitInMinutesConfig,
+            foodEnabledConfig,
+            List.of()
+        );
+    }
+
+    GameModeConfiguration(final GameModeConfigurationElement<Integer> numberOfTeamsConfig,
+                          final GameModeConfigurationElement<Boolean> randomizedTeamsConfig,
+                          final GameModeConfigurationElement<Integer> scoreLimitConfig,
+                          final GameModeConfigurationElement<Integer> timeLimitInMinutesConfig,
+                          final GameModeConfigurationElement<Boolean> foodEnabledConfig,
+                          final List<GameModeConfigurationElement<Integer>> customConfigs) {
+        this.numberOfTeamsConfig = numberOfTeamsConfig;
+        this.randomizedTeamsConfig = randomizedTeamsConfig;
+        this.scoreLimitConfig = scoreLimitConfig;
+        this.timeLimitInMinutesConfig = timeLimitInMinutesConfig;
+        this.foodEnabledConfig = foodEnabledConfig;
         teams = new ArrayList<>();
-    }
+        registerNewTeams(numberOfTeamsConfig.getDefaultValue());
 
-    public GameModeConfiguration initNumberOfTeamsConfig(final int defaultValue, final List<Integer> valueRange) {
-        this.numberOfTeamsConfig.setValue(defaultValue);
-        this.numberOfTeamsConfig.setDefaultValue(defaultValue);
-        this.numberOfTeamsConfig.setValueRange(valueRange);
-        return this;
-    }
-    
-    public GameModeConfiguration initRandomizedTeamsConfig(final boolean defaultValue) {
-        this.randomizedTeamsConfig.setValue(defaultValue);
-        this.randomizedTeamsConfig.setDefaultValue(defaultValue);
-        this.randomizedTeamsConfig.setValueRange(List.of(false, true));
-        return this;
-    }
-    
-    public GameModeConfiguration initScoreLimitConfig(final int defaultValue, final List<Integer> valueRange) {
-        this.scoreLimitConfig.setValue(defaultValue);
-        this.scoreLimitConfig.setDefaultValue(defaultValue);
-        this.scoreLimitConfig.setValueRange(valueRange);
-        return this;
-    }
+        mandatoryConfigMap = new LinkedHashMap<>();
+        mandatoryConfigMap.put(numberOfTeamsConfig.getName(), numberOfTeamsConfig);
+        mandatoryConfigMap.put(randomizedTeamsConfig.getName(), randomizedTeamsConfig);
+        mandatoryConfigMap.put(scoreLimitConfig.getName(), scoreLimitConfig);
+        mandatoryConfigMap.put(timeLimitInMinutesConfig.getName(), timeLimitInMinutesConfig);
+        mandatoryConfigMap.put(foodEnabledConfig.getName(), foodEnabledConfig);
 
-    public GameModeConfiguration initTimeLimitInMinutesConfig(final Integer defaultValue,
-                                                              final List<Integer> valueRange) {
-        this.timeLimitInMinutesConfig.setValue(defaultValue);
-        this.timeLimitInMinutesConfig.setDefaultValue(defaultValue);
-        this.timeLimitInMinutesConfig.setValueRange(valueRange);
-        return this;
-    }
-
-    public GameModeConfiguration initFoodEnabledConfig(final boolean defaultValue) {
-        this.foodEnabledConfig.setValue(defaultValue);
-        this.foodEnabledConfig.setDefaultValue(defaultValue);
-        this.foodEnabledConfig.setValueRange(List.of(false, true));
-        return this;
-    }
-
-    public GameModeConfiguration initTeamsList() {
-        registerNewTeams(numberOfTeamsConfig.getValue());
-        return this;
+        customConfigMap = customConfigs
+            .stream()
+            .collect(Collectors.toMap(GameModeConfigurationElement::getName, config -> config));
     }
 
     public void registerNewTeams(final int numberOfTeams) {
@@ -89,36 +101,15 @@ public class GameModeConfiguration {
         }
     }
 
+    // TODO: Should probably snapshot (OPPA) the online player list when initiating select game mode, that way there's
+    //  something to reset to if players all agree to reset the team selection
     public void resetTeams() {
         teams.forEach(GameModeTeam::reset);
     }
 
-    public void setNumberOfTeamsValue(final int numberOfTeamsConfig) {
-        this.numberOfTeamsConfig.setValue(numberOfTeamsConfig);
-    }
-
-    public void setRandomizedTeamsValue(final boolean randomizedTeamsConfig) {
-        this.randomizedTeamsConfig.setValue(randomizedTeamsConfig);
-    }
-
-    public void setScoreLimitValue(final int scoreLimitConfig) {
-        this.scoreLimitConfig.setValue(scoreLimitConfig);
-    }
-
-    public void setTimeLimitInMinutesValue(final Integer timeLimitInMinutesConfig) {
-        this.timeLimitInMinutesConfig.setValue(timeLimitInMinutesConfig);
-    }
-
-    public void setFoodEnabledValue(final boolean foodEnabledConfig) {
-        this.foodEnabledConfig.setValue(foodEnabledConfig);
-    }
-
     public void reset() {
-        numberOfTeamsConfig.setValue(numberOfTeamsConfig.getDefaultValue());
-        randomizedTeamsConfig.setValue(randomizedTeamsConfig.getDefaultValue());
-        scoreLimitConfig.setValue(scoreLimitConfig.getDefaultValue());
-        timeLimitInMinutesConfig.setValue(timeLimitInMinutesConfig.getDefaultValue());
-        foodEnabledConfig.setValue(foodEnabledConfig.getDefaultValue());
+        mandatoryConfigMap.values().forEach(GameModeConfigurationElement::resetToDefault);
+        customConfigMap.values().forEach(GameModeConfigurationElement::resetToDefault);
         registerNewTeams(numberOfTeamsConfig.getDefaultValue());
     }
     

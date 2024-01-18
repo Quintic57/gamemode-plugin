@@ -3,11 +3,14 @@ package my.dw.gamemodeplugin.model.handlers;
 import my.dw.gamemodeplugin.GameModePlugin;
 import my.dw.gamemodeplugin.model.GameMode;
 import my.dw.gamemodeplugin.model.GameModeHandler;
+import my.dw.gamemodeplugin.utils.GameModeUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Team;
 
@@ -23,8 +26,11 @@ public class DeathmatchHandler extends GameModeHandler implements Listener {
     }
 
     @Override
-    public void startGame() {
+    public void startGame(final Player player) {
         Bukkit.getServer().getPluginManager().registerEvents(this, GameModePlugin.getPlugin());
+        player.getWorld()
+            .getPersistentDataContainer()
+            .set(GameModeUtils.CURRENT_GAME_MODE_KEY, PersistentDataType.STRING, GameMode.DEATHMATCH.name());
         startGame(GameMode.DEATHMATCH);
     }
 
@@ -47,8 +53,8 @@ public class DeathmatchHandler extends GameModeHandler implements Listener {
         }
 
         // TODO: Handle cases for free-for-all games
-        final Team team = mainScoreboard.getEntryTeam(killer.getName());
-        final Score currentScore = mainScoreboard.getObjective(
+        final Team team = getMainScoreboard().getEntryTeam(killer.getName());
+        final Score currentScore = getMainScoreboard().getObjective(
             GameMode.DEATHMATCH.getMainCriterion().getKey()).getScore(team.getColor() + team.getDisplayName());
         modifyScore(currentScore);
     }

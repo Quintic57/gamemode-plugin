@@ -2,12 +2,11 @@ package my.dw.gamemodeplugin.ui.selectgamemode.setupgamemode.configureteams;
 
 import my.dw.gamemodeplugin.model.GameMode;
 import my.dw.gamemodeplugin.model.GameModeTeam;
-import my.dw.gamemodeplugin.ui.ChildGui;
+import my.dw.gamemodeplugin.ui.ChildInventoryGui;
 import my.dw.gamemodeplugin.ui.DynamicInventory;
-import my.dw.gamemodeplugin.ui.GuiFunction;
+import my.dw.gamemodeplugin.ui.InventoryGuiFunction;
 import my.dw.gamemodeplugin.ui.GuiType;
 import my.dw.gamemodeplugin.ui.InventoryGui;
-import my.dw.gamemodeplugin.ui.ItemKey;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -20,7 +19,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class TeamSelectionBaseGui extends ChildGui implements DynamicInventory {
+public class TeamSelectionBaseGui extends ChildInventoryGui implements DynamicInventory {
 
     private final Supplier<Set<UUID>> getterFunction;
 
@@ -44,11 +43,11 @@ public class TeamSelectionBaseGui extends ChildGui implements DynamicInventory {
     public void refreshInventory() {
         clearInventory();
 
-        final Set<UUID> currentCaptains = gameMode.getCurrentConfiguration().getTeams()
+        final Set<UUID> currentCaptains = gameMode.getConfiguration().getTeams()
             .stream()
             .map(GameModeTeam::getCaptain)
             .collect(Collectors.toSet());
-        final Set<UUID> currentPlayers = gameMode.getCurrentConfiguration().getTeams()
+        final Set<UUID> currentPlayers = gameMode.getConfiguration().getTeams()
             .stream()
             .flatMap(team -> team.getPlayerList().stream())
             .collect(Collectors.toSet());
@@ -60,11 +59,11 @@ public class TeamSelectionBaseGui extends ChildGui implements DynamicInventory {
             .forEach(player -> {
                 //TODO: have this use player's skull instead
                 final ItemStack guiItem = createDisplayItem(Material.SKELETON_SKULL, player.getDisplayName());
-                final GuiFunction guiFunction = event -> {
+                final InventoryGuiFunction guiFunction = event -> {
                     setterFunction.accept(player.getUniqueId());
-                    ((DynamicInventory) parentGui).refreshInventory();
+                    ((DynamicInventory) getParentGui()).refreshInventory();
                     final Player teamCaptain = (Player) event.getWhoClicked();
-                    parentGui.openInventory(teamCaptain);
+                    getParentGui().openInventory(teamCaptain);
                 };
                 addGuiItem(guiItem, guiFunction);
         });
